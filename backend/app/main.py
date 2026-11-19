@@ -1,74 +1,66 @@
-"""API HTTP do Sudoku.
-
-Esta camada é só "cola": recebe JSON, valida o formato com Pydantic, chama o
-Prolog (via app/prolog.py) e devolve JSON. Nenhuma regra do jogo mora aqui.
-
-Rodar em modo de desenvolvimento (recarrega ao salvar):
-    uv run fastapi dev app/main.py
-
-Documentação interativa gerada automaticamente: http://localhost:8000/docs
-"""
+"""API do Puppies: validação estrutural e transporte, sem regras do jogo."""
 
 from typing import Annotated, Literal
-
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, Field, model_validator
 from app import prolog
 
-app = FastAPI(title="Sudoku (Prolog + Elm)")
-
-# Uma linha tem exatamente 9 inteiros de 0 a 9; um tabuleiro tem 9 linhas.
-# O Pydantic rejeita automaticamente (erro 422) qualquer coisa fora disso.
-Cell = Annotated[int, Field(ge=0, le=9)]
-Row = Annotated[list[Cell], Field(min_length=9, max_length=9)]
-Grid = Annotated[list[Row], Field(min_length=9, max_length=9)]
+app = FastAPI(title="Puppies (Queens em Prolog)")
+Celula = Annotated[int, Field(strict=True, ge=-1, le=1)]
+Regiao = Annotated[int, Field(strict=True, ge=1, le=10)]
 
 
-class GenerateRequest(BaseModel):
-    difficulty: Literal["easy", "medium", "hard"] = "medium"
+class PedidoGeracao(BaseModel):
+    difficulty: Literal["easy", "hard"] = "easy"
 
 
-class BoardRequest(BaseModel):
-    board: Grid
+class PedidoTabuleiro(BaseModel):
+    board: list[list[Celula]]
+    regions: list[list[Regiao]]
+
+    @model_validator(mode="after")
+    def validar_dimensoes(self):
+        tamanho = len(self.regions)
+        if not 4 <= tamanho <= 10 or len(self.board) != tamanho:
+            raise ValueError("O tamanho deve estar entre 4 e 10.")
+        if any(len(linha) != tamanho for linha in self.board + self.regions):
+            raise ValueError(
+                "As duas matrizes devem ser quadradas e do mesmo tamanho."
+            )
+        if {regiao for linha in self.regions for regiao in linha} != set(
+            range(1, tamanho + 1)
+        ):
+            raise ValueError(
+                "As regiões devem usar todos os identificadores de 1 a N."
+            )
+        return self
 
 
-class BoardResponse(BaseModel):
-    board: Grid
+@app.post("/api/generate", response_model=PedidoTabuleiro)
+def gerar(pedido: PedidoGeracao):
+    return prolog.gerar(pedido.difficulty)
 
 
-class HintResponse(BaseModel):
-    row: int
-    col: int
-    value: int
-
-
-# Mensagens que o Elm mostra na tela quando a resposta é 422.
-NO_SOLUTION = "Este tabuleiro não tem solução. Confira os números preenchidos."
-BOARD_COMPLETE = "O tabuleiro já está completo."
-
-
-@app.post("/api/generate")
-def generate(request: GenerateRequest) -> BoardResponse:
-    return BoardResponse(board=prolog.generate(request.difficulty))
-
-
-@app.post("/api/solve")
-def solve(request: BoardRequest) -> BoardResponse:
-    try:
-        return BoardResponse(board=prolog.solve(request.board))
-    except prolog.NoSolution:
-        # `from None` diz que a HTTPException SUBSTITUI a exceção original,
-        # em vez de ser "causada" por ela; o traceback fica mais limpo.
-        raise HTTPException(status_code=422, detail=NO_SOLUTION) from None
+@app.post("/api/solve", response_model=PedidoTabuleiro)
+def resolver(pedido: PedidoTabuleiro):
+    solucao = prolog.resolver(pedido.regions, pedido.board)
+    if solucao is None:
+        raise HTTPException(
+            422, "Este tabuleiro não tem solução. Confira os puppies e as exclusões."
+        )
+    return {"board": solucao, "regions": pedido.regions}
 
 
 @app.post("/api/hint")
-def hint(request: BoardRequest) -> HintResponse:
-    try:
-        row, col, value = prolog.hint(request.board)
-    except prolog.NoSolution:
-        raise HTTPException(status_code=422, detail=NO_SOLUTION) from None
-    except prolog.BoardComplete:
-        raise HTTPException(status_code=422, detail=BOARD_COMPLETE) from None
-    return HintResponse(row=row, col=col, value=value)
+def dica(pedido: PedidoTabuleiro):
+    resultado = prolog.dica(pedido.regions, pedido.board)
+    if resultado == "completo":
+        raise HTTPException(422, "O tabuleiro já está completo.")
+    if resultado == "impossivel":
+        raise HTTPException(422, "Este tabuleiro não tem solução.")
+    if resultado == "ambiguo":
+        raise HTTPException(
+            422, "Não há puppy obrigatório: existem múltiplas soluções."
+        )
+    linha, coluna, valor = resultado
+    return {"row": linha, "col": coluna, "value": valor}
