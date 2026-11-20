@@ -44,11 +44,12 @@ A solução usa 0 e 1. Um jogo está completo quando os N puppies estão correto
 mesmo que sobrem zeros. Puppies iniciais devem ser preservados pelo cliente.
 A API não mantém sessão; avalia o estado completo enviado pelo cliente.
 
-Fácil: 5×5, alvo mínimo de duas pistas. Difícil: 8×8, alvo de zero pistas.
-O gerador mantém pistas extras quando removê-las destruiria a unicidade.
+Fácil: 5×5, sem pistas iniciais. Difícil: 8×8, sem pistas iniciais.
 Os níveis são parâmetros estruturais, não uma medição de dificuldade humana.
-Regiões geradas são conectadas por distância Manhattan aos puppies da solução;
-mapas personalizados são aceitos mesmo com regiões desconectadas.
+O gerador cresce regiões conectadas irregularmente a partir da solução,
+refina a fronteira até garantir solução única no tabuleiro vazio e embaralha
+os identificadores de 1 a N; mapas personalizados são aceitos mesmo com
+regiões desconectadas.
 
 ## Paradigma lógico e avaliação
 

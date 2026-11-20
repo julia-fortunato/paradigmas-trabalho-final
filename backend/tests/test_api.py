@@ -13,6 +13,7 @@ def test_fluxo(nivel, tamanho):
     assert resposta.status_code == 200
     jogo = resposta.json()
     assert len(jogo["board"]) == tamanho
+    assert all(casa == 0 for linha in jogo["board"] for casa in linha)
     resposta = cliente.post("/api/hint", json=jogo)
     assert resposta.status_code == 200
     dica = resposta.json()

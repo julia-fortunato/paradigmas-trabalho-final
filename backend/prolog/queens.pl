@@ -1,5 +1,6 @@
-﻿:- module(queens, [modelo/3, resolver/3, contar_solucoes/4, dica/3, gerar/3]).
+:- module(queens, [modelo/3, resolver/3, contar_solucoes/4, dica/3, gerar/3]).
 
+:- use_module(library(assoc)).
 :- use_module(library(clpfd)).
 :- use_module(library(random)).
 :- use_module(library(solution_sequences)).
@@ -120,28 +121,34 @@ puppy_obrigatorio(Regioes, Tabuleiro, Solucao, Linha, Coluna) :-
     substituir_casa(Tabuleiro, Linha, Coluna, -1, Alternativa),
     \+ resolver(Regioes, Alternativa, _).
 
-/* Geração: disposição válida, regiões e remoção de pistas */
+/* Geração: disposição válida, crescimento de regiões e unicidade */
 
-% O minimo de pistas é um alvo estrutural, não uma medida humana de esforço.
-nivel(easy, 5, 2).
-nivel(hard, 8, 0).
+% Os níveis definem o tamanho do tabuleiro; ambos começam vazios (0 pistas).
+nivel(easy, 5).
+nivel(hard, 8).
 
 gerar(Nivel, Regioes, Tabuleiro) :-
     must_be(oneof([easy, hard]), Nivel),
-    nivel(Nivel, Tamanho, Minimo),
+    nivel(Nivel, Tamanho),
+    matriz_zeros(Tamanho, Tabuleiro),
+    sortear_solucao(Tamanho, Colunas, Solucao),
+    gerar_regioes_unicas(Tamanho, Colunas, Tabuleiro, Solucao, RegioesBrutas),
+    embaralhar_regioes(Tamanho, RegioesBrutas, Regioes).
+
+matriz_zeros(Tamanho, Matriz) :-
+    length(Linha, Tamanho),
+    maplist(=(0), Linha),
+    length(Matriz, Tamanho),
+    maplist(=(Linha), Matriz).
+
+sortear_solucao(Tamanho, Colunas, Solucao) :-
     length(Colunas, Tamanho),
     Colunas ins 1..Tamanho,
     all_distinct(Colunas),
     separadas(Colunas),
     once(busca_aleatoria(Colunas)),
     numlist(1, Tamanho, Indices),
-    maplist(linha_regioes(Colunas, Indices), Indices, Regioes),
-    maplist(linha_solucao(Indices), Colunas, Completo),
-    findall(Linha-Coluna,
-            ( nth0(Linha, Completo, Valores), nth0(Coluna, Valores, 1) ),
-            Posicoes),
-    random_permutation(Posicoes, Ordem),
-    remover_pistas(Ordem, Minimo, Regioes, Completo, Tabuleiro).
+    maplist(linha_solucao(Indices), Colunas, Solucao).
 
 separadas([]).
 separadas([_]).
@@ -157,19 +164,6 @@ busca_aleatoria([Coluna | Resto]) :-
     member(Coluna, Ordem),
     busca_aleatoria(Resto).
 
-linha_regioes(Colunas, Indices, Linha, Regioes) :-
-    maplist(regiao_proxima(Colunas, Linha), Indices, Regioes).
-
-% Distância Manhattan ao puppy mais próximo, com desempate pelo índice.
-% Essa construção produz regiões conectadas e preserva a solução inicial.
-regiao_proxima(Colunas, Linha, Coluna, Identificador) :-
-    findall(Distancia-Indice,
-            ( nth1(Indice, Colunas, ColunaPuppy),
-              Distancia is abs(Linha - Indice) + abs(Coluna - ColunaPuppy)
-            ),
-            Distancias),
-    keysort(Distancias, [_-Identificador | _]).
-
 linha_solucao(Indices, ColunaPuppy, Linha) :-
     maplist(valor_casa(ColunaPuppy), Indices, Linha).
 
@@ -179,18 +173,168 @@ valor_casa(ColunaPuppy, Coluna, Valor) :-
     ;   Valor = 0
     ).
 
-% Mantém pistas extras quando removê-las destruiria a unicidade.
-remover_pistas([], _, _, Tabuleiro, Tabuleiro).
-remover_pistas([Linha-Coluna | Resto], Minimo, Regioes, Atual, Final) :-
-    append(Atual, Casas),
-    sum_list(Casas, Quantidade),
-    (   Quantidade > Minimo,
-        substituir_casa(Atual, Linha, Coluna, 0, Candidato),
-        contar_solucoes(Regioes, Candidato, 2, 1)
-    ->  Proximo = Candidato
-    ;   Proximo = Atual
+% Cresce regiões conectadas a partir dos puppies e ajusta a fronteira
+% eliminando soluções alternativas até o tabuleiro vazio ter solução única.
+gerar_regioes_unicas(Tamanho, Colunas, Vazio, Solucao, Regioes) :-
+    repeat,
+    crescer_regioes(Tamanho, Colunas, MapaInicial),
+    (   refinar_unicidade(Tamanho, MapaInicial, Vazio, Solucao, [], 25, MapaFinal)
+    ->  !
+    ;   fail
     ),
-    remover_pistas(Resto, Minimo, Regioes, Proximo, Final).
+    mapa_para_matriz(Tamanho, MapaFinal, Regioes).
+
+% Expansão aleatória por arestas de fronteira: preserva conectividade
+% ortogonal de todas as regiões e gera tamanhos variados naturalmente.
+crescer_regioes(Tamanho, Colunas, MapaFinal) :-
+    findall((Linha-Coluna)-Regiao,
+            ( nth1(Regiao, Colunas, ColunaUm),
+              Linha is Regiao - 1,
+              Coluna is ColunaUm - 1
+            ),
+            Sementes),
+    list_to_assoc(Sementes, MapaInicial),
+    findall(Vizinho-Regiao,
+            ( member(Posicao-Regiao, Sementes),
+              vizinho_ortogonal(Tamanho, Posicao, Vizinho),
+              \+ get_assoc(Vizinho, MapaInicial, _)
+            ),
+            Arestas),
+    expandir_regioes(Tamanho, Arestas, MapaInicial, MapaFinal).
+
+expandir_regioes(_, [], Mapa, Mapa) :- !.
+expandir_regioes(Tamanho, Arestas, Mapa, MapaFinal) :-
+    random_member(Posicao-Regiao, Arestas),
+    put_assoc(Posicao, Mapa, Regiao, MapaAtualizado),
+    exclude(mesma_posicao(Posicao), Arestas, ArestasRestantes),
+    findall(NovoVizinho-Regiao,
+            ( vizinho_ortogonal(Tamanho, Posicao, NovoVizinho),
+              \+ get_assoc(NovoVizinho, MapaAtualizado, _)
+            ),
+            NovasArestas),
+    append(NovasArestas, ArestasRestantes, ProximasArestas),
+    expandir_regioes(Tamanho, ProximasArestas, MapaAtualizado, MapaFinal).
+
+mesma_posicao(Posicao, Posicao-_).
+
+vizinho_ortogonal(Tamanho, Linha-Coluna, VizLinha-VizColuna) :-
+    deslocamento(DL, DC),
+    VizLinha is Linha + DL,
+    VizColuna is Coluna + DC,
+    VizLinha >= 0,
+    VizLinha < Tamanho,
+    VizColuna >= 0,
+    VizColuna < Tamanho.
+
+deslocamento(-1, 0).
+deslocamento(1, 0).
+deslocamento(0, -1).
+deslocamento(0, 1).
+
+% Se existir outra solução além da sorteada, move uma casa dessa alternativa
+% para uma região vizinha mantendo a conectividade e preservando a solução alvo.
+refinar_unicidade(Tamanho, Mapa, Vazio, Solucao, Proibidas, Tentativas, MapaFinal) :-
+    mapa_para_matriz(Tamanho, Mapa, Regioes),
+    (   outra_solucao(Regioes, Vazio, Solucao, Alternativa)
+    ->  Tentativas > 0,
+        escolher_troca(Tamanho, Mapa, Solucao, Alternativa, Proibidas,
+                       Posicao, RegiaoAtual, NovaRegiao),
+        put_assoc(Posicao, Mapa, NovaRegiao, MapaAtualizado),
+        Restantes is Tentativas - 1,
+        refinar_unicidade(Tamanho, MapaAtualizado, Vazio, Solucao,
+                          [Posicao-RegiaoAtual | Proibidas], Restantes, MapaFinal)
+    ;   MapaFinal = Mapa
+    ).
+
+outra_solucao(Regioes, Vazio, Solucao, Alternativa) :-
+    resolver(Regioes, Vazio, Alternativa),
+    Alternativa \== Solucao,
+    !.
+
+escolher_troca(Tamanho, Mapa, Solucao, Alternativa, Proibidas,
+               Posicao, RegiaoAtual, NovaRegiao) :-
+    assoc_to_list(Mapa, Pares),
+    findall(Linha-Coluna,
+            ( nth0(Linha, Alternativa, LinhaAlt),
+              nth0(Coluna, LinhaAlt, 1),
+              nth0(Linha, Solucao, LinhaSol),
+              nth0(Coluna, LinhaSol, 0)
+            ),
+            Diferencas),
+    findall(Prioridade-(PosCand-RegAtual-RegViz),
+            troca_candidata(Tamanho, Mapa, Pares, Diferencas, Proibidas,
+                            Prioridade, PosCand, RegAtual, RegViz),
+            Opcoes),
+    Opcoes \= [],
+    keysort(Opcoes, [_- (Posicao-RegiaoAtual-NovaRegiao) | _]).
+
+troca_candidata(Tamanho, Mapa, Pares, Diferencas, Proibidas,
+                Prioridade, Posicao, RegiaoAtual, RegiaoVizinha) :-
+    member(Posicao, Diferencas),
+    get_assoc(Posicao, Mapa, RegiaoAtual),
+    findall(RV,
+            ( vizinho_ortogonal(Tamanho, Posicao, Vizinho),
+              get_assoc(Vizinho, Mapa, RV),
+              RV =\= RegiaoAtual,
+              \+ memberchk(Posicao-RV, Proibidas)
+            ),
+            VizinhasBrutas),
+    sort(VizinhasBrutas, Vizinhas),
+    Vizinhas \= [],
+    findall(Casa, member(Casa-RegiaoAtual, Pares), CasasRegiao),
+    select(Posicao, CasasRegiao, Restantes),
+    regiao_conectada(Tamanho, Restantes),
+    length(Restantes, TamRestante),
+    member(RegiaoVizinha, Vizinhas),
+    findall(CasaViz, member(CasaViz-RegiaoVizinha, Pares), CasasVizinha),
+    length(CasasVizinha, TamVizinha),
+    % Evita reduzir regiões a uma única casa quando há outra opção e
+    % transfere casas de regiões menores para vizinhas maiores.
+    (   TamRestante >= 2
+    ->  Penalidade = 0
+    ;   Penalidade = 200
+    ),
+    random(Aleatorio),
+    Prioridade is Penalidade + TamRestante - TamVizinha + Aleatorio.
+
+regiao_conectada(Tamanho, [Inicio | Resto]) :-
+    visitar_regiao(Tamanho, [Inicio], [Inicio], [Inicio | Resto], Visitadas),
+    length([Inicio | Resto], Total),
+    length(Visitadas, Total).
+
+visitar_regiao(_, [], Visitadas, _, Visitadas) :- !.
+visitar_regiao(Tamanho, [Atual | Fila], Visitadas, Permitidas, Final) :-
+    findall(Vizinho,
+            ( vizinho_ortogonal(Tamanho, Atual, Vizinho),
+              memberchk(Vizinho, Permitidas),
+              \+ memberchk(Vizinho, Visitadas)
+            ),
+            NovosBrutos),
+    sort(NovosBrutos, Novos),
+    append(Fila, Novos, NovaFila),
+    append(Novos, Visitadas, NovasVisitadas),
+    visitar_regiao(Tamanho, NovaFila, NovasVisitadas, Permitidas, Final).
+
+mapa_para_matriz(Tamanho, Mapa, Matriz) :-
+    Ultimo is Tamanho - 1,
+    numlist(0, Ultimo, Indices),
+    maplist(linha_mapa(Mapa, Indices), Indices, Matriz).
+
+linha_mapa(Mapa, Colunas, Linha, Valores) :-
+    maplist(casa_mapa(Mapa, Linha), Colunas, Valores).
+
+casa_mapa(Mapa, Linha, Coluna, Regiao) :-
+    get_assoc(Linha-Coluna, Mapa, Regiao).
+
+% Embaralha os identificadores de 1 a N para não associar o número da região
+% à linha do puppy na solução sorteada.
+embaralhar_regioes(Tamanho, Regioes, Embaralhadas) :-
+    numlist(1, Tamanho, Originais),
+    random_permutation(Originais, Permutacao),
+    maplist(maplist(trocar_regiao(Permutacao)), Regioes, Embaralhadas).
+
+trocar_regiao(Permutacao, Original, Novo) :-
+    nth1(Original, Permutacao, Novo).
 
 % Constrói uma nova matriz sem alterar a anterior.
 substituir_casa(Tabuleiro, Linha, Coluna, Valor, Novo) :-

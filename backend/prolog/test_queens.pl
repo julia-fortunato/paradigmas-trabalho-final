@@ -1,4 +1,4 @@
-﻿:- use_module(queens).
+:- use_module(queens).
 :- use_module(library(plunit)).
 
 :- begin_tests(queens).
@@ -90,11 +90,58 @@ test(impossivel) :-
 test(nivel_invalido, error(type_error(_, medium))) :-
     gerar(medium, _, _).
 
-test(geracao, [forall(member(Nivel, [easy, hard]))]) :-
+test(geracao, [forall(member(Nivel-Tamanho, [easy-5, hard-8]))]) :-
     gerar(Nivel, Regioes, Tabuleiro),
+    length(Regioes, Tamanho),
+    length(Tabuleiro, Tamanho),
+    append(Tabuleiro, Casas),
+    maplist(=(0), Casas),
     contar_solucoes(Regioes, Tabuleiro, 2, 1),
+    regioes_conectadas(Regioes),
     dica(Regioes, Tabuleiro, [Linha, Coluna, 1]),
     nth0(Linha, Tabuleiro, Valores),
     nth0(Coluna, Valores, 0).
+
+test(ids_regioes_embaralhados) :-
+    % Em várias gerações, os IDs das regiões não devem ficar presos à linha do puppy.
+    once((
+        between(1, 5, _),
+        gerar(easy, Regioes, Tabuleiro),
+        once(resolver(Regioes, Tabuleiro, Solucao)),
+        nth1(Linha, Solucao, LinhaSolucao),
+        nth1(Coluna, LinhaSolucao, 1),
+        nth1(Linha, Regioes, LinhaRegioes),
+        nth1(Coluna, LinhaRegioes, Regiao),
+        Regiao =\= Linha
+    )).
+
+regioes_conectadas(Regioes) :-
+    length(Regioes, Tamanho),
+    forall(between(1, Tamanho, Regiao),
+           ( findall(L-C,
+                     ( nth0(L, Regioes, Linha),
+                       nth0(C, Linha, Regiao)
+                     ),
+                     Casas),
+             Casas = [Inicio | _],
+             alcancaveis([Inicio], [Inicio], Casas, Visitadas),
+             length(Casas, Total),
+             length(Visitadas, Total)
+           )).
+
+alcancaveis([], Visitadas, _, Visitadas) :- !.
+alcancaveis([L-C | Fila], Visitadas, Permitidas, Final) :-
+    findall(VL-VC,
+            ( member(DL-DC, [(-1)-0, 1-0, 0-(-1), 0-1]),
+              VL is L + DL,
+              VC is C + DC,
+              memberchk(VL-VC, Permitidas),
+              \+ memberchk(VL-VC, Visitadas)
+            ),
+            Novos0),
+    sort(Novos0, Novos),
+    append(Fila, Novos, NovaFila),
+    append(Novos, Visitadas, NovasVisitadas),
+    alcancaveis(NovaFila, NovasVisitadas, Permitidas, Final).
 
 :- end_tests(queens).
