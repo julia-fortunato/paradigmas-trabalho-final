@@ -35,6 +35,16 @@ class PedidoTabuleiro(BaseModel):
             )
         return self
 
+class RespostaVerificacao(BaseModel):
+    status: Literal["incompleto", "conflito", "venceu"]
+    conflicts: list[tuple[int, int]]
+
+
+@app.post("/api/check", response_model=RespostaVerificacao)
+def verificar(pedido: PedidoTabuleiro):
+    status, conflitos = prolog.verificar(pedido.regions, pedido.board)
+    return {"status": status, "conflicts": conflitos}
+
 
 @app.post("/api/generate", response_model=PedidoTabuleiro)
 def gerar(pedido: PedidoGeracao):

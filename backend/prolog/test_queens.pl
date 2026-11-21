@@ -144,4 +144,39 @@ alcancaveis([L-C | Fila], Visitadas, Permitidas, Final) :-
     append(Novos, Visitadas, NovasVisitadas),
     alcancaveis(NovaFila, NovasVisitadas, Permitidas, Final).
 
+
+
+    test(verificar_venceu) :-
+    exemplo(Regioes, _),
+    solucao_exemplo(Tabuleiro),
+    verificar(Regioes, Tabuleiro, venceu, []).
+
+test(verificar_incompleto) :-
+    exemplo(Regioes, Tabuleiro),
+    verificar(Regioes, Tabuleiro, incompleto, []).
+
+test(verificar_ignora_exclusoes) :-
+    exemplo(Regioes, [[_ | Resto] | Linhas]),
+    verificar(Regioes, [[-1 | Resto] | Linhas], incompleto, []).
+
+test(verificar_conflito_linha) :-
+    exemplo(Regioes, [_ | Linhas]),
+    verificar(Regioes, [[1, 0, 1, 0] | Linhas], conflito, [[0, 0], [0, 2]]).
+
+test(verificar_conflito_diagonal) :-
+    exemplo(Regioes, [_, _ | Linhas]),
+    verificar(Regioes, [[1, 0, 0, 0], [0, 1, 0, 0] | Linhas],
+              conflito, [[0, 0], [1, 1]]).
+
+test(verificar_conflito_regiao) :-
+    % (0,0) e (1,2) estão na região 1, sem compartilhar linha, coluna nem diagonal.
+    Regioes = [[1, 1, 1, 1],
+               [2, 2, 1, 1],
+               [3, 3, 4, 4],
+               [3, 3, 4, 4]],
+    Tabuleiro = [[1, 0, 0, 0],
+                 [0, 0, 1, 0],
+                 [0, 0, 0, 0],
+                 [0, 0, 0, 0]],
+    verificar(Regioes, Tabuleiro, conflito, [[0, 0], [1, 2]]).
 :- end_tests(queens).

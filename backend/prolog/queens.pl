@@ -1,4 +1,4 @@
-:- module(queens, [modelo/3, resolver/3, contar_solucoes/4, dica/3, gerar/3]).
+:- module(queens, [modelo/3, resolver/3, contar_solucoes/4, dica/3, gerar/3, verificar/4]).
 
 :- use_module(library(assoc)).
 :- use_module(library(clpfd)).
@@ -120,6 +120,50 @@ puppy_obrigatorio(Regioes, Tabuleiro, Solucao, Linha, Coluna) :-
     puppy_pendente(Tabuleiro, Solucao, Linha, Coluna),
     substituir_casa(Tabuleiro, Linha, Coluna, -1, Alternativa),
     \+ resolver(Regioes, Alternativa, _).
+
+
+verificar(Regioes, Tabuleiro, Status, Conflitos) :-
+    length(Regioes, Tamanho),
+    puppies(Tabuleiro, Posicoes),
+    conflitos(Regioes, Posicoes, Conflitos),
+    length(Posicoes, Quantidade),
+    (   Conflitos \== []
+    ->  Status = conflito
+    ;   Quantidade =:= Tamanho
+    ->  Status = venceu
+    ;   Status = incompleto
+    ).
+
+puppies(Tabuleiro, Posicoes) :-
+    findall([Linha, Coluna],
+            ( nth0(Linha, Tabuleiro, Valores),
+              nth0(Coluna, Valores, 1)
+            ),
+            Posicoes).
+
+conflitos(Regioes, Posicoes, Conflitos) :-
+    findall([L, C],
+            ( member([L, C], Posicoes),
+              member([L2, C2], Posicoes),
+              [L, C] \== [L2, C2],
+              em_conflito(Regioes, L, C, L2, C2)
+            ),
+            Brutos),
+    sort(Brutos, Conflitos).
+
+em_conflito(_, L, _, L, _) :- !.                     
+em_conflito(_, _, C, _, C) :- !.                    
+em_conflito(_, L, C, L2, C2) :-                      
+    abs(L - L2) =:= 1,
+    abs(C - C2) =:= 1,
+    !.
+em_conflito(Regioes, L, C, L2, C2) :-                 
+    regiao_de(Regioes, L, C, Regiao),
+    regiao_de(Regioes, L2, C2, Regiao).
+
+regiao_de(Regioes, Linha, Coluna, Regiao) :-
+    nth0(Linha, Regioes, Valores),
+    nth0(Coluna, Valores, Regiao).
 
 /* Geração: disposição válida, crescimento de regiões e unicidade */
 

@@ -27,3 +27,11 @@ def dica(regioes, tabuleiro):
         "queens:dica(Regioes, Tabuleiro, Resultado)",
         {"Regioes": regioes, "Tabuleiro": tabuleiro},
     )["Resultado"]
+
+def verificar(regioes, tabuleiro):
+    resultado = janus.query_once(
+        "queens:verificar(Regioes, Tabuleiro, Status, Conflitos)",
+        {"Regioes": regioes, "Tabuleiro": tabuleiro},
+    )
+    return resultado["Status"], resultado["Conflitos"]
+
