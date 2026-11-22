@@ -5,17 +5,13 @@ se tocar, nem diagonalmente. Diagonais distantes são permitidas.
 
 ## Executar e testar
 
-Requisitos: SWI-Prolog com suporte a Janus, Python >= 3.11 e uv.
-No Windows, a compila??o do `janus-swi` tamb?m requer Visual Studio Build
-Tools 2022 com a carga de trabalho C++ e o SDK do Windows. Instala??o:
+Requisitos: SWI-Prolog, Python >= 3.11 e uv. O comando `swipl` deve estar no
+PATH; no Windows, a ponte também procura `C:\Program Files\swipl\bin\swipl.exe`.
+Sem Janus, cada chamada da API executa o SWI-Prolog como subprocesso. As regras
+continuam em `prolog/queens.pl`.
 
-```powershell
-winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --silent --accept-package-agreements --accept-source-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-```
-
-Ambiente validado: Windows x64, Python 3.13.15, SWI-Prolog 10.0.2 e
-janus-swi 1.5.3. Ap?s instalar as ferramentas, `uv sync` compila o Janus e
-instala as depend?ncias no ambiente virtual local `backend/.venv`.
+Janus é opcional. Para usá-lo, instale a dependência extra com `uv sync --extra janus`.
+No Windows, a compilação do `janus-swi` requer Visual Studio Build Tools com C++.
 
 Na pasta backend:
 
