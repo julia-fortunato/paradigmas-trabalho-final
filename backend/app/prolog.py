@@ -1,73 +1,92 @@
-"""Ponte entre Python e Prolog usando a biblioteca janus.
-
-janus (pacote `janus-swi`) embute o SWI-Prolog dentro do processo Python.
-Não há servidor Prolog separado nem troca de mensagens: chamamos predicados
-diretamente e recebemos as respostas como dicionários Python.
-
-Conversão automática de tipos (Python -> Prolog):
-    int          -> inteiro
-    str          -> string  (use janus.Term / átomos com cuidado, veja abaixo)
-    list         -> lista
-    dict         -> dict do SWI-Prolog
-
-Para mais detalhes: https://www.swi-prolog.org/pldoc/man?section=janus
-
-Este é o ÚNICO arquivo do projeto que conhece o janus. O resto do backend
-só chama as funções abaixo.
-"""
-
+import json
+import os
 from pathlib import Path
+import shutil
+import subprocess
 
-import janus_swi as janus
+ARQUIVO_REGRAS = Path(__file__).parent.parent / "prolog" / "queens.pl"
 
-Grid = list[list[int]]
-
-PROLOG_FILE = Path(__file__).parent.parent / "prolog" / "sudoku.pl"
-
-# consult/1 carrega o arquivo .pl, como `?- [sudoku].` no terminal do swipl.
-janus.consult(str(PROLOG_FILE))
-
-
-class NoSolution(Exception):
-    """O tabuleiro enviado não tem solução."""
+try:
+    import janus_swi as janus
+    janus.consult(str(ARQUIVO_REGRAS))
+except (ImportError, OSError):
+    janus = None
 
 
-class BoardComplete(Exception):
-    """O tabuleiro não tem casas vazias: não há dica para dar."""
+def _swipl():
+    encontrado = shutil.which("swipl")
+    if encontrado:
+        return encontrado
+    caminho_windows = Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "swipl" / "bin" / "swipl.exe"
+    if caminho_windows.is_file():
+        return str(caminho_windows)
+    raise RuntimeError("SWI-Prolog não encontrado. Instale o swipl ou adicione-o ao PATH.")
 
 
-def solve(puzzle: Grid) -> Grid:
-    # query_once executa a consulta e devolve um dict com as variáveis da
-    # consulta (em maiúsculas, como no Prolog) e a chave 'truth', que diz se
-    # a consulta teve sucesso.
-    result = janus.query_once("sudoku:solve(Puzzle, Solution)", {"Puzzle": puzzle})
-    if not result["truth"]:
-        raise NoSolution
-    return result["Solution"]
-
-
-def generate(difficulty: str) -> Grid:
-    # Strings do Python viram strings do Prolog, mas generate/2 espera um
-    # ÁTOMO (easy, medium, hard). atom_string/2 faz a conversão do lado Prolog.
-    result = janus.query_once(
-        "atom_string(D, Name), sudoku:generate(D, Puzzle)", {"Name": difficulty}
+def _consultar(objetivo):
+    comando = [
+        _swipl(), "-q", "-s", str(ARQUIVO_REGRAS),
+        "-g", "use_module(library(http/json))," + objetivo + ",halt",
+    ]
+    resultado = subprocess.run(
+        comando, capture_output=True, text=True, encoding="utf-8", timeout=120, check=True
     )
-    return result["Puzzle"]
+    return json.loads(resultado.stdout)
 
 
-def hint(board: Grid) -> tuple[int, int, int]:
-    result = janus.query_once("sudoku:hint(Board, Result)", {"Board": board})["Result"]
-    # hint/2 sempre tem sucesso e devolve, em Result, uma lista [Linha,
-    # Coluna, Valor] ou um dos átomos `complete` e `unsolvable` (átomos
-    # chegam ao Python como strings). Quem decidiu o que aconteceu foi o
-    # Prolog; aqui só traduzimos cada caso. O `match` do Python escolhe o
-    # ramo pela FORMA do valor, parecido com o casamento de padrões do
-    # Prolog e do Elm.
-    match result:
-        case "complete":
-            raise BoardComplete
-        case "unsolvable":
-            raise NoSolution
-        case [row, col, value]:
-            return row, col, value
-    raise ValueError(f"resultado inesperado de hint/2: {result!r}")
+def _matriz(matriz):
+    return json.dumps(matriz, separators=(",", ":"))
+
+
+def gerar(dificuldade):
+    if janus is None:
+        if dificuldade not in ("easy", "hard"):
+            raise ValueError("Dificuldade inválida.")
+        return _consultar(
+            f"queens:gerar({dificuldade},Regioes,Tabuleiro),"
+            "json_write_dict(current_output,_{regions:Regioes,board:Tabuleiro})"
+        )
+    resultado = janus.query_once(
+        "atom_string(Nivel, Nome), queens:gerar(Nivel, Regioes, Tabuleiro)",
+        {"Nome": dificuldade},
+    )
+    return {"regions": resultado["Regioes"], "board": resultado["Tabuleiro"]}
+
+
+def resolver(regioes, tabuleiro):
+    if janus is None:
+        return _consultar(
+            f"(queens:resolver({_matriz(regioes)},{_matriz(tabuleiro)},Solucao)"
+            "->json_write(current_output,Solucao);write(null))"
+        )
+    resultado = janus.query_once(
+        "queens:resolver(Regioes, Tabuleiro, Solucao)",
+        {"Regioes": regioes, "Tabuleiro": tabuleiro},
+    )
+    return resultado.get("Solucao") if resultado["truth"] else None
+
+
+def dica(regioes, tabuleiro):
+    if janus is None:
+        return _consultar(
+            f"queens:dica({_matriz(regioes)},{_matriz(tabuleiro)},Resultado),"
+            "json_write(current_output,Resultado)"
+        )
+    return janus.query_once(
+        "queens:dica(Regioes, Tabuleiro, Resultado)",
+        {"Regioes": regioes, "Tabuleiro": tabuleiro},
+    )["Resultado"]
+
+def verificar(regioes, tabuleiro):
+    if janus is None:
+        resultado = _consultar(
+            f"queens:verificar({_matriz(regioes)},{_matriz(tabuleiro)},Status,Conflitos),"
+            "json_write_dict(current_output,_{status:Status,conflicts:Conflitos})"
+        )
+        return resultado["status"], resultado["conflicts"]
+    resultado = janus.query_once(
+        "queens:verificar(Regioes, Tabuleiro, Status, Conflitos)",
+        {"Regioes": regioes, "Tabuleiro": tabuleiro},
+    )
+    return resultado["Status"], resultado["Conflitos"]
+
