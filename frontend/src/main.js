@@ -1,4 +1,4 @@
-import "./style-inicial.css";
+import "./styles/album.css";
 import { Elm } from "./Main.elm";
 
 Elm.Main.init({ node: document.getElementById("app") });
