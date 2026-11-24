@@ -4,7 +4,7 @@ module Regions exposing (Seal(..), breed, name, seals)
 raça do puppy que cola nela e o selo que mostra se a região já tem puppy.
 -}
 
-import Grid
+import Grid exposing (Cell(..))
 
 
 {-| Nome da tinta de cada região, na ordem fixa do álbum (região 1 é azul).
@@ -43,14 +43,14 @@ type Seal
 
 {-| Um selo por região (1 a N), contando os puppies colados em cada uma.
 -}
-seals : Int -> List (List Int) -> List (List Int) -> List ( Int, Seal )
+seals : Int -> List (List Int) -> List (List Cell) -> List ( Int, Seal )
 seals size regions board =
     let
         puppiesIn region =
             List.map2
                 (List.map2
-                    (\r v ->
-                        if r == region && v == 1 then
+                    (\r cell ->
+                        if r == region && cell == Puppy then
                             1
 
                         else

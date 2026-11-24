@@ -9,7 +9,7 @@ import Api exposing (Puzzle)
 import Board
 import Browser
 import Browser.Dom
-import Grid
+import Grid exposing (Cell(..))
 import Html exposing (Html, button, div, h1, header, main_, section, span, text)
 import Html.Attributes exposing (attribute, class, classList, type_)
 import Html.Events exposing (onClick)
@@ -157,7 +157,7 @@ puppiesLeft : Model -> Int
 puppiesLeft model =
     case model.puzzle of
         Just puzzle ->
-            boardSize model - Grid.count 1 puzzle.board
+            boardSize model - Grid.count Puppy puzzle.board
 
         Nothing ->
             boardSize model
@@ -197,7 +197,11 @@ update msg model =
         PressCell row col ->
             case model.puzzle of
                 Just puzzle ->
-                    place row col (nextValue (Grid.at row col puzzle.board)) model
+                    let
+                        current =
+                            Grid.at row col puzzle.board |> Maybe.withDefault Empty
+                    in
+                    place row col (Grid.nextCell current) model
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -210,7 +214,7 @@ update msg model =
                 ( row, col ) =
                     model.focus
             in
-            place row col 0 model
+            place row col Empty model
 
         BoardKey key ->
             let
@@ -282,11 +286,15 @@ update msg model =
                             , focus = ( clue.row, clue.col )
                             , version = nextVersion
                             , said =
-                                if clue.value == 1 then
-                                    "Dica: puppy na " ++ where_ ++ "."
+                                case clue.value of
+                                    Puppy ->
+                                        "Dica: puppy na " ++ where_ ++ "."
 
-                                else
-                                    "Dica: a " ++ where_ ++ " não tem puppy."
+                                    Excluded ->
+                                        "Dica: a " ++ where_ ++ " não tem puppy."
+
+                                    Empty ->
+                                        "Dica: casa limpa na " ++ where_ ++ "."
                           }
                         , Api.check updated (GotCheck nextVersion)
                         )
@@ -410,23 +418,9 @@ startGame difficulty model =
     )
 
 
-{-| Ciclo de uma casa: vazia → puppy → × → vazia.
--}
-nextValue : Int -> Int
-nextValue old =
-    if old == 0 then
-        1
-
-    else if old == 1 then
-        -1
-
-    else
-        0
-
-
 {-| Coloca um valor numa casa e pede ao Prolog para conferir o tabuleiro.
 -}
-place : Int -> Int -> Int -> Model -> ( Model, Cmd Msg )
+place : Int -> Int -> Cell -> Model -> ( Model, Cmd Msg )
 place row col value model =
     case ( model.puzzle, model.original ) of
         ( Just puzzle, Just original ) ->
@@ -435,10 +429,10 @@ place row col value model =
                     model.phase /= Playing || won model || model.request /= Nothing
 
                 given =
-                    Grid.at row col original.board == 1
+                    Grid.at row col original.board == Just Puppy
 
                 unchanged =
-                    Grid.at row col puzzle.board == value
+                    Grid.at row col puzzle.board == Just value
             in
             if locked || given || unchanged then
                 ( model, Cmd.none )
@@ -464,16 +458,17 @@ place row col value model =
                     , problem = Nothing
 
                     -- Mantém a hachura só onde ainda há puppy até o Prolog responder.
-                    , conflicts = List.filter (\( r, c ) -> Grid.at r c updated.board == 1) model.conflicts
+                    , conflicts = List.filter (\( r, c ) -> Grid.at r c updated.board == Just Puppy) model.conflicts
                     , said =
-                        if value == 1 then
-                            "Puppy colado na " ++ position ++ "."
+                        case value of
+                            Puppy ->
+                                "Puppy colado na " ++ position ++ "."
 
-                        else if value == -1 then
-                            "Casa marcada com ×."
+                            Excluded ->
+                                "Casa marcada com ×."
 
-                        else
-                            "Casa limpa."
+                            Empty ->
+                                "Casa limpa."
                   }
                 , Api.check updated (GotCheck version)
                 )
