@@ -2,7 +2,6 @@ module Regions exposing (Seal(..), breed, name, seals)
 
 {-| Dados de apresentação das regiões coloridas: o nome de cada tinta, a
 raça do puppy que cola nela e o selo que mostra se a região já tem puppy.
-
 -}
 
 import Grid

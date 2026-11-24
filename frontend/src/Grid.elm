@@ -19,7 +19,15 @@ setCell row col value grid =
     List.indexedMap
         (\r cells ->
             if r == row then
-                List.indexedMap (\c old -> if c == col then value else old) cells
+                List.indexedMap
+                    (\c old ->
+                        if c == col then
+                            value
+
+                        else
+                            old
+                    )
+                    cells
 
             else
                 cells
