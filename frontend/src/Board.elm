@@ -9,17 +9,13 @@ Delete/Backspace limpa.
 
 -}
 
-import Grid
+import Grid exposing (Cell(..))
 import Html exposing (Html, button, div, span, text)
 import Html.Attributes exposing (attribute, class, classList, disabled, id, tabindex, type_)
 import Html.Events exposing (onClick, onFocus, preventDefaultOn)
 import Icons
 import Json.Decode as Decode
 import Regions
-
-
-type alias Grid =
-    List (List Int)
 
 
 {-| Em que situação o tabuleiro está.
@@ -39,9 +35,9 @@ type Mode
 
 type alias State =
     { size : Int
-    , regions : Grid
-    , board : Grid
-    , fixed : Grid
+    , regions : List (List Int)
+    , board : List (List Cell)
+    , fixed : List (List Cell)
     , conflicts : List ( Int, Int )
     , hint : Maybe ( Int, Int )
     , focus : ( Int, Int )
@@ -103,17 +99,17 @@ viewCell state events row col =
             state.mode == Loading || state.mode == Offline
 
         region =
-            Grid.at row col state.regions
+            Grid.at row col state.regions |> Maybe.withDefault 0
 
         value =
-            Grid.at row col state.board
+            Grid.at row col state.board |> Maybe.withDefault Empty
 
         regionAt r c =
             if r < 0 || c < 0 || r >= state.size || c >= state.size then
                 0
 
             else
-                Grid.at r c state.regions
+                Grid.at r c state.regions |> Maybe.withDefault 0
 
         -- Picote: borda do tabuleiro (o-*) ou divisa com outra região (e-*).
         edge side r c onBorder =
@@ -133,7 +129,7 @@ viewCell state events row col =
             state.hint == Just ( row, col )
 
         fixed =
-            state.mode == Locked || Grid.at row col state.fixed == 1
+            state.mode == Locked || Grid.at row col state.fixed == Just Puppy
 
         classes =
             if skeleton then
@@ -149,8 +145,8 @@ viewCell state events row col =
                         ++ edge "l" row (col - 1) (col == 0)
                         ++ edge "b" (row + 1) col (row == state.size - 1)
                         ++ edge "r" row (col + 1) (col == state.size - 1)
-                        ++ flag (value == 1) "is-puppy"
-                        ++ flag (value == -1) "is-excluded"
+                        ++ flag (value == Puppy) "is-puppy"
+                        ++ flag (value == Excluded) "is-excluded"
                         ++ flag conflict "is-conflict"
                         ++ flag hinted "is-hint"
                         ++ flag fixed "is-fixed"
@@ -164,14 +160,15 @@ viewCell state events row col =
                     [ "Linha " ++ String.fromInt (row + 1)
                     , ", coluna " ++ String.fromInt (col + 1)
                     , ", região " ++ Regions.name region
-                    , if value == 1 then
-                        ", puppy"
+                    , case value of
+                        Puppy ->
+                            ", puppy"
 
-                      else if value == -1 then
-                        ", marcada com ×"
+                        Excluded ->
+                            ", marcada com ×"
 
-                      else
-                        ", vazia"
+                        Empty ->
+                            ", vazia"
                     , if conflict then
                         ", em conflito"
 
@@ -204,14 +201,16 @@ viewCell state events row col =
         (if skeleton then
             []
 
-         else if value == 1 then
-            [ span [ class "piece", attribute "aria-hidden" "true" ] [ text (Regions.breed region) ] ]
-
-         else if value == -1 then
-            [ Icons.view "mark-x" Icons.X ]
-
          else
-            []
+            case value of
+                Puppy ->
+                    [ span [ class "piece", attribute "aria-hidden" "true" ] [ text (Regions.breed region) ] ]
+
+                Excluded ->
+                    [ Icons.view "mark-x" Icons.X ]
+
+                Empty ->
+                    []
         )
 
 

@@ -4,21 +4,18 @@ module Hud exposing (clock, view)
 selos das regiões mostrando quais já têm puppy.
 -}
 
+import Grid exposing (Cell)
 import Html exposing (Html, div, li, p, span, text, ul)
 import Html.Attributes exposing (attribute, class, id)
 import Regions exposing (Seal(..))
-
-
-type alias Grid =
-    List (List Int)
 
 
 type alias Stats =
     { seconds : Int
     , moves : Int
     , size : Int
-    , regions : Grid
-    , board : Grid
+    , regions : List (List Int)
+    , board : List (List Cell)
     }
 
 

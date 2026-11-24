@@ -47,3 +47,92 @@ def test_nivel_invalido():
         cliente.post("/api/generate", json={"difficulty": "medium"}).status_code
         == 422
     )
+
+
+REGIOES_4X4 = [
+    [1, 1, 1, 1],
+    [2, 2, 1, 1],
+    [3, 3, 4, 4],
+    [3, 3, 4, 4],
+]
+
+
+def test_check_incompleto_e_ignora_exclusoes():
+    tabuleiro = [
+        [-1, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+    ]
+    resposta = cliente.post(
+        "/api/check", json={"regions": REGIOES_4X4, "board": tabuleiro}
+    )
+    assert resposta.status_code == 200
+    assert resposta.json() == {"status": "incompleto", "conflicts": []}
+
+
+def test_check_venceu():
+    regioes = [
+        [1, 1, 1, 1],
+        [2, 2, 2, 2],
+        [3, 3, 3, 3],
+        [4, 4, 4, 4],
+    ]
+    solucao = [
+        [0, 1, 0, 0],
+        [0, 0, 0, 1],
+        [1, 0, 0, 0],
+        [0, 0, 1, 0],
+    ]
+    resposta = cliente.post(
+        "/api/check", json={"regions": regioes, "board": solucao}
+    )
+    assert resposta.status_code == 200
+    assert resposta.json() == {"status": "venceu", "conflicts": []}
+
+
+@pytest.mark.parametrize(
+    "tabuleiro,esperados",
+    [
+        (
+            [
+                [1, 0, 1, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [[0, 0], [0, 2]],
+        ),
+        (
+            [
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [[0, 0], [1, 1]],
+        ),
+        (
+            [
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [[0, 0], [1, 2]],
+        ),
+    ],
+)
+def test_check_conflitos(tabuleiro, esperados):
+    resposta = cliente.post(
+        "/api/check", json={"regions": REGIOES_4X4, "board": tabuleiro}
+    )
+    assert resposta.status_code == 200
+    assert resposta.json() == {"status": "conflito", "conflicts": esperados}
+
+
+def test_check_rejeita_formato_invalido():
+    assert (
+        cliente.post("/api/check", json={"board": [[0]], "regions": [[1]]}).status_code
+        == 422
+    )

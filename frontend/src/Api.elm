@@ -18,6 +18,7 @@ lemos as respostas.
 
 -}
 
+import Grid exposing (Cell)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -27,12 +28,16 @@ import Json.Encode as Encode
 -- TIPOS
 
 
-type alias Grid =
+type alias RegionsGrid =
     List (List Int)
 
 
+type alias Board =
+    List (List Cell)
+
+
 type alias Puzzle =
-    { regions : Grid, board : Grid }
+    { regions : RegionsGrid, board : Board }
 
 
 type Outcome
@@ -46,7 +51,7 @@ type alias CheckResult =
 
 
 type alias Hint =
-    { row : Int, col : Int, value : Int }
+    { row : Int, col : Int, value : Cell }
 
 
 {-| Erros que a interface sabe explicar.
@@ -151,16 +156,35 @@ errorText error =
 -- JSON
 
 
-gridDecoder : Decoder Grid
-gridDecoder =
+regionsDecoder : Decoder RegionsGrid
+regionsDecoder =
     Decode.list (Decode.list Decode.int)
+
+
+cellDecoder : Decoder Cell
+cellDecoder =
+    Decode.int
+        |> Decode.andThen
+            (\value ->
+                case Grid.cellFromInt value of
+                    Just cell ->
+                        Decode.succeed cell
+
+                    Nothing ->
+                        Decode.fail ("Valor de célula inválido: " ++ String.fromInt value)
+            )
+
+
+boardDecoder : Decoder Board
+boardDecoder =
+    Decode.list (Decode.list cellDecoder)
 
 
 puzzleDecoder : Decoder Puzzle
 puzzleDecoder =
     Decode.map2 Puzzle
-        (Decode.field "regions" gridDecoder)
-        (Decode.field "board" gridDecoder)
+        (Decode.field "regions" regionsDecoder)
+        (Decode.field "board" boardDecoder)
 
 
 outcomeDecoder : Decoder Outcome
@@ -199,17 +223,22 @@ hintDecoder =
     Decode.map3 Hint
         (Decode.field "row" Decode.int)
         (Decode.field "col" Decode.int)
-        (Decode.field "value" Decode.int)
+        (Decode.field "value" cellDecoder)
 
 
-encodeGrid : Grid -> Encode.Value
-encodeGrid grid =
-    Encode.list (Encode.list Encode.int) grid
+encodeRegions : RegionsGrid -> Encode.Value
+encodeRegions regions =
+    Encode.list (Encode.list Encode.int) regions
+
+
+encodeBoard : Board -> Encode.Value
+encodeBoard board =
+    Encode.list (Encode.list (Grid.cellToInt >> Encode.int)) board
 
 
 encodePuzzle : Puzzle -> Encode.Value
 encodePuzzle puzzle =
     Encode.object
-        [ ( "regions", encodeGrid puzzle.regions )
-        , ( "board", encodeGrid puzzle.board )
+        [ ( "regions", encodeRegions puzzle.regions )
+        , ( "board", encodeBoard puzzle.board )
         ]

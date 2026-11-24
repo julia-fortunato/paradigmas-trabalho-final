@@ -1,6 +1,7 @@
 module RegionsTest exposing (suite)
 
 import Expect
+import Grid
 import Regions exposing (Seal(..))
 import Test exposing (Test, describe, test)
 
@@ -35,9 +36,9 @@ suite =
                             ]
 
                         board =
-                            [ [ 1, -1, 0 ]
-                            , [ 0, 1, -1 ]
-                            , [ 1, 0, 0 ]
+                            [ [ Grid.Puppy, Grid.Excluded, Grid.Empty ]
+                            , [ Grid.Empty, Grid.Puppy, Grid.Excluded ]
+                            , [ Grid.Puppy, Grid.Empty, Grid.Empty ]
                             ]
                     in
                     Regions.seals 3 regions board
