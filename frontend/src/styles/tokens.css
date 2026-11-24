@@ -1,0 +1,187 @@
+/* ==========================================================================
+   tokens.css: variáveis do sistema "Puppies Álbum" (álbum de figurinhas).
+
+   Todas as cores, espaços, raios e sombras ficam aqui. Os outros arquivos
+   (components.css e layout.css) só usam var(--nome).
+
+   O tema claro vale para `.pp`; o tema escuro, para `.pp.is-dark`. O Elm
+   liga e desliga a classe `is-dark` no elemento raiz.
+   ========================================================================== */
+
+:root {
+  --font-ui: "Archivo Variable", Archivo, system-ui, sans-serif;
+  --font-display: var(--font-ui);
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+
+  /* Eixo de largura da Archivo: 125% na marca, 112% nos números. */
+  --wdth-display: 125;
+  --wdth-numeral: 112;
+  --weight-display: 900;
+  --weight-numeral: 800;
+
+  --text-micro: .75rem;
+  --text-small: .875rem;
+  --text-body: 1rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.5rem;
+  --text-mark: 2rem;
+  --text-numeral: 3.25rem;
+  --text-hero: 6rem;
+  --leading-tight: .92;
+  --leading-snug: 1.2;
+  --leading-body: 1.5;
+  --tracking-label: .08em;
+  --tracking-display: -.02em;
+
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --dur-instant: 90ms;
+  --dur-fast: .16s;
+  --dur-base: .28s;
+  --dur-slow: .6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-instant: 0s; --dur-fast: 0s; --dur-base: 0s; --dur-slow: 0s; }
+}
+
+/* ---------- Tema claro: capa branco pastel, pacotinho vermelho ---------- */
+.pp {
+  --ground: #edf3f7;
+  --packet: #e2402d;
+  --packet-ink: #fbfbf8;
+  --surface: #fbfbf8;
+  --surface-sunk: #dce9f1;
+  --surface-hover: #ffffff;
+  --ink: #16151b;
+  --ink-2: #2a1f22;
+  --ink-3: #3b2a2a;
+  --paper-ink-2: #4a4048;
+  --paper-ink-3: #6a5d63;
+  --line: #16151b38;
+  --rule: #16151b4d;
+  --rope-color: #16151bb3;
+  --inverse: #fbfbf8;
+  --mark: var(--ink);
+  --sticker: #fffefb;
+  --slot: #ffffffe6;
+  --focus: #16151b;
+  --alert: #16151b;
+  --paper-alert: #b3122a;
+  --gold: #ffd23d;
+  --hover-veil: #ffffff4d;
+  --press-veil: #141a2a1a;
+  --ghost-hover: #0b3a5514;
+  --scrim: #edf3f7e6;
+  --selection: #ffd23d99;
+  --fold: #0b3a5540;
+
+  /* Regiões: a ordem nunca muda (região 1 é sempre azul). */
+  --region-1: #8fb4ec;
+  --region-2: #f3a08f;
+  --region-3: #f6d665;
+  --region-4: #93cfa4;
+  --region-5: #c3a9e8;
+  --region-6: #f5b3cf;
+  --region-7: #f7b679;
+  --region-8: #86cdd2;
+  --region-9: #d8bb92;
+  --region-10: #d4dde8;
+  --region-1-on: #16151b;
+  --region-2-on: #16151b;
+  --region-3-on: #16151b;
+  --region-4-on: #16151b;
+  --region-5-on: #16151b;
+  --region-6-on: #16151b;
+  --region-7-on: #16151b;
+  --region-8-on: #16151b;
+  --region-9-on: #16151b;
+  --region-10-on: #16151b;
+
+  --shadow-card: 0 1px 0 #0b3a551f, 0 14px 28px -14px #0b3a558c;
+  --shadow-lift: 0 2px 0 #0b3a5526, 0 26px 50px -22px #0b3a55a6;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-sm: 6px;
+  --radius-sticker: 8px;
+  --radius-control: 10px;
+  --radius-board: 14px;
+  --radius-card: 14px;
+  --radius-round: 999px;
+
+  --rope: 3px;
+  --rope-half: 1.5px;
+  --hairline: 1px;
+  --control-border: 1.5px;
+
+  --tap: 44px;
+  --bar-h: 64px;
+  --side-w: 320px;
+  --board-max: 640px;
+
+  color-scheme: light;
+}
+
+/* ---------- Tema escuro: capa azul-noite ---------- */
+.pp.is-dark {
+  --ground: #0d3340;
+  --packet: #5c1209;
+  --packet-ink: var(--ink);
+  --ghost-hover: #ffffff1f;
+  --surface: #1e1a1f;
+  --surface-sunk: #2c3138;
+  --surface-hover: var(--surface-sunk);
+  --ink: #fbf3ef;
+  --ink-2: #f0d4cc;
+  --ink-3: #e0b8ad;
+  --paper-ink-2: #d9c9c4;
+  --paper-ink-3: #bfaaa4;
+  --line: #fbf3ef38;
+  --rule: var(--line);
+  --rope-color: #fbf3ef99;
+  --inverse: #1e1a1f;
+  --mark: var(--ink);
+  --slot: #00000059;
+  --focus: #ffd23d;
+  --alert: #ffd23d;
+  --paper-alert: #ff8a7a;
+  --hover-veil: #ffffff24;
+  --press-veil: #00000033;
+  --scrim: #0d3340eb;
+  --selection: #ffd23d66;
+  --fold: #000000a6;
+
+  --region-1: #4f73b8;
+  --region-2: #b8604f;
+  --region-3: #b79a2c;
+  --region-4: #4c8f63;
+  --region-5: #8467b3;
+  --region-6: #b56a8c;
+  --region-7: #b8773d;
+  --region-8: #3f8f95;
+  --region-9: #9a7c54;
+  --region-10: #7c8796;
+  --region-1-on: #fbf3ef;
+  --region-2-on: #fbf3ef;
+  --region-3-on: #16151b;
+  --region-4-on: #fbf3ef;
+  --region-5-on: #fbf3ef;
+  --region-6-on: #fbf3ef;
+  --region-7-on: #16151b;
+  --region-8-on: #fbf3ef;
+  --region-9-on: #fbf3ef;
+  --region-10-on: #fbf3ef;
+
+  --shadow-card: 0 1px 0 #0000004d, 0 14px 30px -14px #000000cc;
+  --shadow-lift: 0 2px 0 #0000004d, 0 26px 56px -22px #000000e6;
+
+  color-scheme: dark;
+}

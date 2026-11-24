@@ -1,0 +1,150 @@
+/* ==========================================================================
+   layout.css: a página do jogo como um álbum aberto.
+
+   Página esquerda: o tabuleiro. Página direita: o placar (pacotinho de
+   figurinhas), os selos das regiões, o status, as ações e as regras.
+   Abaixo de 860px, tudo vira uma coluna só.
+   ========================================================================== */
+
+.pp-wrap { container: pp / inline-size; min-height: 100%; }
+.pp {
+  min-height: 100vh; padding: 0 32px 48px;
+  background: var(--ground); color: var(--ink); font-family: var(--font-ui);
+  line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  accent-color: var(--focus); caret-color: var(--focus);
+}
+.pp ::selection { background: var(--selection); }
+
+/* ---------- Barra ---------- */
+.pp-bar { max-width: 1200px; margin: 0 auto; }
+.pp-bar .btn--ghost { color: var(--mark); }
+.pp-bar .btn--ghost:focus-visible { outline-color: var(--mark); }
+.pp .brand { text-shadow: 0 2px 0 #ffffff66; }
+.pp.is-dark .brand { text-shadow: 0 2px 0 #00000059; }
+
+/* ---------- Álbum aberto ---------- */
+.pp-spread {
+  position: relative; max-width: 1200px; margin: 8px auto 0;
+  display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+  grid-template-areas: "board hud" "board side"; grid-template-rows: auto 1fr;
+  border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow-lift);
+}
+.pp:not(.is-dark) .pp-spread { box-shadow: 0 0 0 1px #0b3a551a, var(--shadow-lift); }
+.pp-board {
+  grid-area: board; position: relative; display: grid; place-items: center; padding: 40px;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+  box-shadow: inset -26px 0 30px -28px var(--fold);
+}
+.pp-hud {
+  grid-area: hud; display: grid; gap: var(--space-4); padding: 40px 36px 0;
+  border-left: 1px solid var(--line); box-shadow: inset 26px 0 30px -28px var(--fold);
+}
+.pp-side {
+  grid-area: side; display: grid; align-content: start; gap: var(--space-5);
+  padding: var(--space-5) 36px 40px;
+  border-left: 1px solid var(--line); box-shadow: inset 26px 0 30px -28px var(--fold);
+}
+
+/* ---------- Tabuleiro sobre o papel: sem sombra própria, só um fio ---------- */
+.pp .board { max-width: 640px; box-shadow: inset 0 0 0 1px var(--line); }
+.pp .pp-row { display: contents; }
+.pp .board .cell.o-t.o-l { border-top-left-radius: var(--radius-sm); }
+.pp .board .cell.o-t.o-r { border-top-right-radius: var(--radius-sm); }
+.pp .board .cell.o-b.o-l { border-bottom-left-radius: var(--radius-sm); }
+.pp .board .cell.o-b.o-r { border-bottom-right-radius: var(--radius-sm); }
+.pp .board .cell:focus-visible::before,
+.pp .board .cell.is-conflict:focus-visible::before {
+  inset: 4px; border-radius: 4px; box-shadow: 0 0 0 3px var(--focus), 0 0 0 6px var(--surface);
+}
+.pp .board.is-error .cell { animation: none; opacity: .6; cursor: default; }
+
+/* ---------- Pacotinho de figurinhas: o placar ---------- */
+.pp .pp-packet {
+  background: var(--packet); box-shadow: none; padding: 28px 24px 22px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) center / 100% calc(100% - 12px) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / 12px 6px repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 12px 6px repeat-x;
+  mask:
+    linear-gradient(#000 0 0) center / 100% calc(100% - 12px) no-repeat,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / 12px 6px repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 12px 6px repeat-x;
+}
+.pp .pp-packet .armband__label,
+.pp .pp-packet .armband__value { color: var(--packet-ink); }
+.pp .pp-packet .armband__stat + .armband__stat { border-left-color: color-mix(in oklab, var(--packet-ink) 40%, transparent); }
+
+/* ---------- Selos das regiões ---------- */
+.pp-seals { display: grid; gap: var(--space-2); }
+.pp-seals__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.pp-label { margin: 0; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.pp-count {
+  font-stretch: 112%; font-variation-settings: "wdth" 112; font-weight: 800;
+  font-variant-numeric: tabular-nums; font-size: 1rem; color: var(--ink);
+}
+.pp .rosette { box-shadow: inset 0 0 0 3px var(--r), 0 0 0 1px var(--rule); }
+.pp .rosette.is-filled { box-shadow: 0 0 0 3px var(--sticker), 0 0 0 4px var(--rule), 0 4px 8px -4px #00000080; }
+
+/* ---------- Status, ações e regras ---------- */
+.pp .status { min-height: 2.6em; }
+.pp .status .btn { margin-left: auto; }
+.pp-side .actions { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; }
+.pp-kbd { margin: 0; font-size: .875rem; line-height: 1.45; color: var(--ink-2); }
+.pp-kbd kbd {
+  display: inline-block; min-width: 1.6em; padding: 0 .35em;
+  border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 5px;
+  background: var(--surface); font: inherit; font-weight: 650; font-size: .8125rem;
+  text-align: center; color: var(--ink);
+}
+@media (hover: none) { .pp-kbd { display: none; } }
+
+/* ---------- Vitória: a capa cobre a página e o selo campeão aparece ---------- */
+.pp-win {
+  position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; padding: 24px;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+  background: var(--scrim); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.pp .victory.victory--card { width: min(100%, 420px); padding: 36px 28px 28px; gap: 20px; }
+.pp .victory__title { font-size: 3rem; }
+.pp .victory .actions { justify-content: center; }
+.pp .champion { height: 210px; width: 200px; }
+
+/* Estados com movimento infinito param com reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  .pp .board.is-loading .cell,
+  .pp .btn[aria-busy="true"]::after { animation: none; }
+}
+
+/* Álbum estreito (notebook pequeno): as ações quebram linha em vez de vazar. */
+@container pp (max-width: 1120px) {
+  .pp-side .actions { display: flex; flex-wrap: wrap; }
+}
+
+/* ---------- Celular: uma página só, tabuleiro no meio, ações no polegar ---------- */
+@container pp (max-width: 860px) {
+  .pp { padding: 0 12px 20px; }
+  .pp .brand { font-size: 1.375rem; }
+  .pp .bar__end { gap: 0; }
+  .pp .segmented__option { padding: 0 var(--space-2); }
+  .pp-spread {
+    grid-template-columns: minmax(0, 1fr); grid-template-areas: "hud" "board" "side";
+    grid-template-rows: auto; margin-top: 0;
+  }
+  .pp-board { padding: 6px 12px 0; box-shadow: none; border-radius: 0; }
+  .pp-hud { padding: 16px 12px 10px; border-left: 0; box-shadow: none; gap: 12px; }
+  .pp-side { padding: 14px 16px 20px; border-left: 0; box-shadow: none; gap: 14px; }
+  .pp .pp-packet { padding: 18px 16px 14px; }
+  .pp .pp-packet .armband__stat { grid-template-columns: auto 1fr; align-items: baseline; gap: var(--space-3); padding-left: var(--space-4); }
+  .pp .pp-packet .armband__stat:first-child { padding-left: 0; }
+  .pp .pp-packet .armband__value { font-size: 1.75rem; }
+  .pp .rosette { --size: 22px; }
+  .pp-kbd { display: none; }
+  .pp-side .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pp-side .actions .btn { padding: 0 var(--space-2); }
+  .pp-win { border-radius: 0; padding: 12px; }
+  .pp .victory.victory--card { padding: 20px 16px 16px; gap: 12px; }
+  .pp .champion { zoom: .6; }
+  .pp .victory__title { font-size: 2.25rem; }
+  .pp .victory__stats { gap: var(--space-5); }
+  .pp .victory__stats dd { font-size: 1.75rem; }
+}

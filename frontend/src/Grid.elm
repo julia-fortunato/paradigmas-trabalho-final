@@ -1,4 +1,4 @@
-module Grid exposing (at, setCell)
+module Grid exposing (at, count, setCell)
 
 import List
 
@@ -25,3 +25,13 @@ setCell row col value grid =
                 cells
         )
         grid
+
+
+{-| Quantas casas da grade têm o valor dado.
+-}
+count : Int -> List (List Int) -> Int
+count value grid =
+    grid
+        |> List.concat
+        |> List.filter ((==) value)
+        |> List.length
