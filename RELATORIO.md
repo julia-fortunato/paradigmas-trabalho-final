@@ -5,7 +5,7 @@
 | Nome completo | Matrícula | Turma (14h/16h) | Usuário GitHub |
 |---------------|-----------|-----------------|----------------|
 | Diogo Rodrigues Barboza | 222006660 | 16h | @diogo-barboza |
-| [Nome] | [000000] | [14h] | [@usuario] |
+| Natália Rodrigues de Morais | 221037975 | 16h | @Natyrodrigues |
 | [Nome] | [000000] | [14h] | [@usuario] |
 | [Nome] | [000000] | [14h] | [@usuario] |
 | [Nome] | [000000] | [14h] | [@usuario] |
