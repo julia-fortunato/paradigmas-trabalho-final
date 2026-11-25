@@ -12,7 +12,7 @@
 | [Nome] | [000000] | [14h] | [@usuario] |
 
 - **Nome do projeto:** Puppies
-- **Nome do grupo:** Matilha Lógica
+- **Nome do grupo:** MeLasqueixon
 - **Repositório:** https://github.com/julia-fortunato/paradigmas-trabalho-final
 - **Commit ou tag entregue:** [a definir na tag final]
 - **Ponto de partida:** remix original
