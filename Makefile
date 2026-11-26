@@ -1,7 +1,3 @@
-# Atalhos para as tarefas mais comuns. Uso: `make <alvo>`.
-#
-# O `make` só interpreta as linhas de receita (indentadas com TAB), cada uma
-# executada num shell separado; por isso usamos `cd pasta && comando`.
 
 .PHONY: install dev backend frontend test test-prolog test-backend validar
 

@@ -4,19 +4,20 @@
 
 | Nome completo | Matrícula | Turma (14h/16h) | Usuário GitHub |
 |---------------|-----------|-----------------|----------------|
-| Diogo Rodrigues Barboza | 222006660 | 16h | @diogo-barboza |
-| Natália Rodrigues de Morais | 221037975 | 16h | @Natyrodrigues |
-| [Nome] | [000000] | [14h] | [@usuario] |
-| [Nome] | [000000] | [14h] | [@usuario] |
-| [Nome] | [000000] | [14h] | [@usuario] |
-| [Nome] | [000000] | [14h] | [@usuario] |
+| Diogo Rodrigues Barboza | 222006660 | 16h | diogo-barboza |
+| Natália Rodrigues de Morais | 221037975 | 16h | Natyrodrigues |
+| Maurício Ferreira de Araújo | 222007021 | 16h | mauricio-araujoo |
+| Andre Claudio Maia da Cunha | 222037648 | 16h | andre-maia51 |
+| Luana Ribeiro Soares | 202016720 | 16h | luanasoares0901 |
+| Júlia Rocha Fortunato | 221022355 | 16h | julia-fortunato |
+| Felipe de Oliveira Motta | 221031158 | 16h | M0tt1nh4 |
 
 - **Nome do projeto:** Puppies
 - **Nome do grupo:** MeLasqueixon
 - **Repositório:** https://github.com/julia-fortunato/paradigmas-trabalho-final
 - **Commit ou tag entregue:** [a definir na tag final]
 - **Ponto de partida:** remix original
-- **Slides da apresentação oral:** não há
+- **Slides da apresentação oral:** [Slides de Apresentação](https://canva.link/ql20jjgap8w35wc)
 
 ## 2. Resumo
 
@@ -217,11 +218,12 @@ Ao combinar `Decode.andThen` com `Grid.cellFromInt : Int -> Maybe Cell`, garanti
 | Integrante | Principais contribuições |
 |------------|--------------------------|
 | Diogo Rodrigues Barboza | Padronização com `elm-format`, configuração e implementação dos 34 testes unitários em `elm-test`, cobertura `pytest` para `/api/check`, refatoração de células `Int` para o *custom type* `Cell` em Elm e estruturação inicial do `README.md` e `RELATORIO.md`. |
-| [Nome] | [...] |
-| [Nome] | [...] |
-| [Nome] | [...] |
-| [Nome] | [...] |
-| [Nome] | [...] |
+| Maurício Ferreira de Araújo | Integração do `frontend` em `elm` com a api, criação dos tipos para comunicação com `FastApi` e mvp funcional do tabuleiro dos puppies. |
+| Júlia Rocha Fortunato | Criação das rotas da api, criação da logica em prolog, integração do `FastApi` com os arquivos prolog, e criação e organização dos slides de apresentação. |
+| Luana Ribeiro Soares | Criação e organização dos slides de apresentação, participação no desenvolvimento do frontend em Elm, pair programming, contribuição na estilização e ajustes da interface nos arquivos CSS e implementação da integração do frontend com a API. |
+| Natália Rodrigues de Morais | Implementação do predicado verificar/4 em Prolog (queens.pl) para avaliar o estado do tabuleiro (incompleto, conflito e venceu) e identificar conflitos de linha, coluna, diagonal adjacente e região, integração via Janus em prolog.py, criação do endpoint POST /api/check com o modelo RespostaVerificacao em main.py e adição de 6 testes unitários em plunit (test_queens.pl). |
+| André Cláudio Maia da Cunha | Apoio na criação da parte lógica do projeto, refatoração do gerador em Prolog (queens.pl) para gerar tabuleiros easy e hard sem pistas iniciais com crescimento irregular de regiões ortogonalmente conectadas via library(assoc), refinamento iterativo de fronteiras para garantir solução única, embaralhamento dos IDs das regiões, ampliação dos testes em plunit (test_queens.pl) e pytest (test_api.py) e atualização do backend/README.md.|
+| Felipe de Oliveira Motta | Refatoração do mvp do front, criação dos css para responsividade mobile. |
 
 ## 11. Fontes, código de terceiros e uso de IA
 
@@ -235,20 +237,24 @@ Ao combinar `Decode.andThen` com `Grid.cellFromInt : Int -> Maybe Cell`, garanti
 
 | Ferramenta | Para que foi usada | Como o grupo verificou o resultado |
 |------------|--------------------|------------------------------------|
-| Assistente de IA (IDE) | Apoio na refatoração do tipo `Cell` em Elm, criação de testes unitários (`elm-test` e `pytest`) e revisão da documentação | Revisão manual do diff linha a linha, execução de `elm-format --validate`, `elm make`, `elm-test`, `pytest`, `plunit` e teste manual no navegador |
+| Assistente de IA integrado na IDE | Apoio na refatoração do tipo `Cell` em Elm, criação de testes unitários (`elm-test` e `pytest`) e revisão da documentação | Revisão manual do diff linha a linha, execução de `elm-format --validate`, `elm make`, `elm-test`, `pytest`, `plunit` e teste manual no navegador |
+| Codex | Apoio na refatoração do css no front, revisão da documentação, criação das regras de negocio em prolog | Revisão manual do diff linha a linha, teste manual no navegador e uso do `swipl` |
 
 ## 12. Apresentação oral
 
-- **Slides:** não há
+- **Slides:** [Slides de Apresentação](https://canva.link/ql20jjgap8w35wc)
 - **Roteiro:**
 
 | Parte | Duração | Quem apresenta |
 |-------|---------|----------------|
-| Contexto e regras do Puppies | 2 min | [Nome] |
-| Demonstração do sistema rodando | 5 min | [Nome] |
-| Código Prolog (`queens.pl`) | 3 min | [Nome] |
-| Código Elm (`Grid.elm`, `Api.elm`, `Main.elm`) | 3 min | [Nome] |
-| Limitações e aprendizados | 2 min | [Nome] |
+| Contexto e regras do Puppies | 1 min | Luana |
+| Tecnologias e arquitetura da implementação | 1 min | Natália |
+| Código Prolog (`backend/prolog/queens.pl`): restrições, resolução, dicas e geração | 3 min | Júlia e André |
+| Código Elm (`Grid.elm`, `Main.elm`, `Api.elm`): tipos, estado e comunicação | 3 min | Maurício, Felipe e Diogo |
+| Demonstração do sistema: jogadas, conflitos, dicas e solução | 4 min | Maurício |
+| Etapas do projeto e organização do grupo | 1 min | Luana |
+| Limitações, dificuldades e aprendizados sobre os paradigmas | 1 min | Diogo |
+| Encerramento | 1 min | Natália |
 
 ## 13. Reflexão sobre os paradigmas
 
