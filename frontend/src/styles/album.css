@@ -1,0 +1,5 @@
+/* Ponto de entrada do visual "Puppies Álbum". A ordem importa: tokens
+   primeiro, depois os componentes e por fim o layout da página. */
+@import "./tokens.css";
+@import "./components.css";
+@import "./layout.css";

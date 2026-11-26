@@ -1,7 +1,3 @@
-# Atalhos para as tarefas mais comuns. Uso: `make <alvo>`.
-#
-# O `make` só interpreta as linhas de receita (indentadas com TAB), cada uma
-# executada num shell separado; por isso usamos `cd pasta && comando`.
 
 .PHONY: install dev backend frontend test test-prolog test-backend validar
 
@@ -21,7 +17,7 @@ frontend:           ## só o frontend: http://localhost:5173
 test: test-prolog test-backend
 
 test-prolog:
-	swipl -g run_tests -t halt backend/prolog/test_sudoku.pl
+	swipl -g run_tests -t halt backend/prolog/test_queens.pl
 
 test-backend:
 	cd backend && uv run pytest

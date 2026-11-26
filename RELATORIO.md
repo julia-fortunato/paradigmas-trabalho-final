@@ -1,341 +1,263 @@
-<!--
-  TEMPLATE DO RELATÓRIO DE ENTREGA: Paradigmas de Programação
-
-  Como usar:
-  - Copie este arquivo para a raiz do repositório do grupo, com o nome
-    RELATORIO.md, e preencha todas as seções.
-  - Os textos entre <!- - e - -> (como este) são instruções. Eles não
-    aparecem quando o arquivo é visualizado, mas APAGUE-OS antes de entregar.
-  - Troque tudo o que estiver entre [colchetes].
-  - Seja direto. Frases curtas e listas valem mais que parágrafos longos.
-    Um relatório típico cabe em 4 a 8 páginas.
-  - O relatório e o código são avaliados juntos. Sempre que possível,
-    aponte para o código (arquivo e linha) em vez de descrevê-lo. Os
-    critérios de avaliação estão em AVALIACAO.md.
-  - ANTES DE ENTREGAR, rode o validador na raiz do repositório:
-
-        uv run scripts/validar_entrega.py
-
-    Ele confere a FORMA do relatório (comentários apagados, colchetes
-    preenchidos, tabelas bem formadas, seções presentes, arquivos
-    existentes), não o conteúdo. Corrija todos os ERROS apontados.
--->
-
-# [Nome do projeto]
+# Puppies
 
 ## 1. Identificação
 
-<!--
-  Os grupos têm de 3 a 7 pessoas (5, em média). A tabela abaixo tem 5
-  linhas: adicione ou remova linhas conforme o tamanho do seu grupo, aqui e
-  na seção 10. Os grupos podem misturar alunos das turmas das 14h e das 16h:
-  indique a turma de CADA integrante.
--->
-
 | Nome completo | Matrícula | Turma (14h/16h) | Usuário GitHub |
 |---------------|-----------|-----------------|----------------|
-| [Nome]        | [000000]  | [14h]           | [@usuario]     |
-| [Nome]        | [000000]  | [16h]           | [@usuario]     |
-| [Nome]        | [000000]  | [14h]           | [@usuario]     |
-| [Nome]        | [000000]  | [16h]           | [@usuario]     |
-| [Nome]        | [000000]  | [14h]           | [@usuario]     |
+| Diogo Rodrigues Barboza | 222006660 | 16h | diogo-barboza |
+| Natália Rodrigues de Morais | 221037975 | 16h | Natyrodrigues |
+| Maurício Ferreira de Araújo | 222007021 | 16h | mauricio-araujoo |
+| Andre Claudio Maia da Cunha | 222037648 | 16h | andre-maia51 |
+| Luana Ribeiro Soares | 202016720 | 16h | luanasoares0901 |
+| Júlia Rocha Fortunato | 221022355 | 16h | julia-fortunato |
+| Felipe de Oliveira Motta | 221031158 | 16h | M0tt1nh4 |
 
-- **Nome do projeto:** [o mesmo do título acima]
-- **Nome do grupo:** [um nome criativo, que não se repita na turma]
-  <!--
-    O nome do grupo identifica vocês nas planilhas de notas e na chamada
-    para a apresentação. Não dá para validar se é único, então caprichem:
-    "Grupo 3" vai colidir com o "Grupo 3" da outra turma.
-  -->
-- **Repositório:** [https://github.com/...]
-- **Commit ou tag entregue:** [`a1b2c3d` ou `v1.0`]
-  <!--
-    O avaliador vai olhar exatamente esta versão. Para criar uma tag:
-      git tag v1.0 && git push origin v1.0
-  -->
-- **Ponto de partida:** [template do Sudoku com ajustes | variante do Sudoku | outro jogo conhecido | remix original | jogo inventado]
-  <!--
-    Escolha UMA faixa. Ela define o ajuste de escopo da nota do grupo
-    (AVALIACAO.md, seção 1.5). O professor confirma a faixa na apresentação.
-  -->
-- **Slides da apresentação oral:** [`docs/apresentacao.pdf` | link externo | não há]
-  <!--
-    No final do semestre, cada grupo faz uma apresentação oral de 15
-    minutos. Slides são opcionais; se o grupo usar, coloque o arquivo no
-    repositório (de preferência em PDF) e indique o caminho aqui.
-  -->
+- **Nome do projeto:** Puppies
+- **Nome do grupo:** MeLasqueixon
+- **Repositório:** https://github.com/julia-fortunato/paradigmas-trabalho-final
+- **Commit ou tag entregue:** [a definir na tag final]
+- **Ponto de partida:** remix original
+- **Slides da apresentação oral:** [Slides de Apresentação](https://canva.link/ql20jjgap8w35wc)
 
 ## 2. Resumo
 
-<!--
-  De 3 a 5 linhas: o que o sistema faz, para quem, e qual problema o
-  Prolog resolve nele. Quem ler só esta seção deve entender o projeto.
--->
-
-[Resumo do projeto.]
-
-![Captura de tela do sistema](docs/captura.png)
-<!-- Uma ou duas capturas de tela da interface. Crie a pasta docs/ se precisar. -->
+Puppies é um jogo de lógica inspirado em *Queens / Star Battle*, adaptado com temática de álbum de figurinhas de cachorrinhos: o jogador deve posicionar exatamente um puppy em cada linha, coluna e região colorida sem que dois se toquem, nem mesmo na diagonal imediata. O Prolog (CLP(FD)) resolve todas as regras do domínio — geração de tabuleiros com regiões conectadas e solução única, verificação de conflitos, dicas por prova de obrigatoriedade e resolução completa — enquanto a interface em Elm gerencia o tabuleiro, o placar, o tema claro/escuro e a navegação acessível por teclado.
 
 ## 3. Como executar
 
-<!--
-  Teste estas instruções numa máquina "limpa" (ou peça a um colega de
-  outro grupo). Se o avaliador não conseguir rodar o sistema, o resto do
-  trabalho não pode ser verificado.
--->
+**Requisitos:**
 
-**Requisitos** (com as versões que o grupo usou):
-
-- SWI-Prolog [9.x]
-- Node.js [2x.x]
-- [uv / Python 3.x, se usar]
+- SWI-Prolog 9.2+ (`swipl` no `PATH`)
+- Node.js 20+ com `npm`
+- uv (gerencia Python 3.11+ e ambiente virtual)
 
 **Instalação e execução:**
 
 ```sh
-[comandos exatos, na ordem]
+make install
+make backend   # terminal 1: http://localhost:8000
+make frontend  # terminal 2: http://localhost:5173
 ```
 
 **Testes:**
 
 ```sh
-[comando para rodar os testes, se houver]
+make test
+cd frontend && npm test
+cd frontend && npx elm-format --validate src tests
 ```
 
-**Testado em:** [Linux / Windows / macOS, navegador]
+**Testado em:** macOS (Safari e Chrome) e Linux.
 
 ## 4. Arquitetura
 
-<!--
-  Um diagrama simples (pode ser em texto) mostrando as partes do sistema e
-  como elas se comunicam. Diga em uma frase a responsabilidade de cada parte.
--->
-
-```
-[Elm] --HTTP/JSON--> [Python] --janus--> [Prolog]
+```text
+[Elm (Vite)] --HTTP/JSON--> [FastAPI (Python)] --janus / swipl--> [SWI-Prolog]
 ```
 
-| Parte  | Responsabilidade | Arquivos principais |
-|--------|------------------|---------------------|
-| Prolog | [...]            | [`backend/prolog/...`] |
-| Elm    | [...]            | [`frontend/src/...`]   |
-| Python | [só integração]  | [`backend/app/...`]    |
+| Parte | Responsabilidade | Arquivos principais |
+|-------|------------------|---------------------|
+| Prolog | Regras, restrições CLP(FD), gerador de regiões únicas, verificador e dica | `backend/prolog/queens.pl`, `backend/prolog/test_queens.pl` |
+| Elm | Interface reativa (TEA), tipos do domínio, navegação por teclado, placar e API | `frontend/src/Main.elm`, `frontend/src/Grid.elm`, `frontend/src/Board.elm`, `frontend/src/Api.elm`, `frontend/src/Regions.elm`, `frontend/src/Hud.elm`, `frontend/src/Sidebar.elm`, `frontend/src/Victory.elm` |
+| Python | Só integração: validação Pydantic, ponte `janus`/subprocesso e tradução HTTP | `backend/app/main.py`, `backend/app/prolog.py` |
 
 ## 5. Parte em Prolog
 
 ### 5.1 Predicados principais
 
-<!--
-  Os predicados mais importantes, com o local no código. Use a notação
-  nome/aridade e indique entradas (+) e saídas (-), como na documentação
-  do SWI-Prolog.
--->
-
 | Predicado | Local | O que faz |
 |-----------|-------|-----------|
-| [`resolver(+Entrada, -Saida)`] | [`arquivo.pl:42`] | [...] |
-| [...] | [...] | [...] |
+| `modelo(+Regioes, +Tabuleiro, -Solucao)` | `backend/prolog/queens.pl:15` | Declara domínio binário `0..1`, soma `1` por linha, coluna e região e ausência de contato diagonal imediato |
+| `resolver(+Regioes, +Tabuleiro, -Solucao)` | `backend/prolog/queens.pl:87` | Aplica `modelo/3` e executa `labeling([ff], Casas)` permitindo enumeração por backtracking |
+| `contar_solucoes(+Regioes, +Tabuleiro, +Limite, -Qtd)` | `backend/prolog/queens.pl:92` | Conta soluções até `Limite` usando `limit/2` para provar unicidade |
+| `dica(+Regioes, +Tabuleiro, -Resultado)` | `backend/prolog/queens.pl:98` | Retorna `[Linha, Coluna, 1]` apenas para posição obrigatória em todas as soluções, ou `completo`/`impossivel`/`ambiguo` |
+| `verificar(+Regioes, +Tabuleiro, -Status, -Conflitos)` | `backend/prolog/queens.pl:125` | Classifica o tabuleiro em `venceu`, `conflito` ou `incompleto` e lista as coordenadas em conflito |
+| `gerar(+Nivel, -Regioes, -Tabuleiro)` | `backend/prolog/queens.pl:174` | Sorteia solução, cresce regiões conectadas e refina fronteiras até garantir solução única |
 
 ### 5.2 Conceitos do paradigma lógico utilizados
 
-<!--
-  Marque o que o projeto usa DE FATO e indique onde. Não é preciso usar
-  tudo; é preciso explicar bem o que foi usado.
--->
-
-- [ ] Fatos e regras como base de conhecimento: [onde]
-- [ ] Unificação e casamento de padrões: [onde]
-- [ ] Recursão (inclusive sobre listas): [onde]
-- [ ] Backtracking e múltiplas soluções: [onde]
-- [ ] `findall/3`, `bagof/3`, `setof/3` ou similares: [onde]
-- [ ] Corte (`!`) ou negação (`\+`), e por que foram necessários: [onde]
-- [ ] Programação por restrições (CLP(FD) ou outra): [onde]
-- [ ] Predicados de ordem superior (`maplist`, `foldl`, `include`...): [onde]
-- [ ] Outro: [...]
+- [x] Fatos e regras como base de conhecimento: `nivel/2` (`queens.pl:171-172`) e `deslocamento/2` (`queens.pl:273-276`)
+- [x] Unificação e casamento de padrões: `fixar/2` (`queens.pl:47-49`), `diagonais/2` (`queens.pl:76-82`) e `casas_regiao/4` (`queens.pl:60-66`)
+- [x] Recursão (inclusive sobre listas): `sem_contato/1` (`queens.pl:70-74`), `expandir_regioes/4` (`queens.pl:249-260`) e `refinar_unicidade/7` (`queens.pl:280-291`)
+- [x] Backtracking e múltiplas soluções: `resolver/3` sem corte (`queens.pl:87-90`) e `busca_aleatoria/1` (`queens.pl:203-209`)
+- [x] `findall/3`, `bagof/3`, `setof/3` ou similares: `contar_solucoes/4` (`queens.pl:94`), `conflitos/3` (`queens.pl:145`) e `crescer_regioes/3` (`queens.pl:234-246`)
+- [x] Corte (`!`) ou negação (`\+`), e por que foram necessários: `\+ resolver(...)` em `puppy_obrigatorio/5` (`queens.pl:122`) para provar obrigatoriedade por refutação, e `!` em `em_conflito/5` (`queens.pl:154-159`) para evitar múltiplas justificativas do mesmo par
+- [x] Programação por restrições (CLP(FD) ou outra): `Casas ins 0..1`, `sum(Casas, #=, 1)`, `all_distinct/1`, `transpose/2` e restrições diagonais `#=< 1` (`queens.pl:15-82`, `queens.pl:188-201`)
+- [x] Predicados de ordem superior (`maplist`, `foldl`, `include`...): `maplist/3` em `modelo/3` (`queens.pl:29-33`) e `exclude/3` em `expandir_regioes/4` (`queens.pl:253`)
 
 ### 5.3 Trecho em destaque
 
-<!--
-  Escolha o trecho de Prolog de que o grupo mais se orgulha (ou o mais
-  difícil). Cole o código e explique como ele funciona: o que é declarado,
-  como o Prolog chega à resposta, e por que essa solução é "lógica" e não
-  uma tradução de um algoritmo imperativo.
--->
-
 ```prolog
-[trecho]
+sem_contato([]).
+sem_contato([_]).
+sem_contato([Superior, Inferior | Linhas]) :-
+    diagonais(Superior, Inferior),
+    sem_contato([Inferior | Linhas]).
+
+diagonais([], []).
+diagonais([_], [_]).
+diagonais([AcimaEsquerda, AcimaDireita | Superior],
+          [AbaixoEsquerda, AbaixoDireita | Inferior]) :-
+    AcimaEsquerda + AbaixoDireita #=< 1,
+    AcimaDireita + AbaixoEsquerda #=< 1,
+    diagonais([AcimaDireita | Superior], [AbaixoDireita | Inferior]).
 ```
 
-[Explicação.]
+Em vez de percorrer coordenadas com laços imperativos verificando vizinhos após cada tentativa, declaramos a restrição `AcimaEsquerda + AbaixoDireita #=< 1` entre variáveis lógicas adjacentes da matriz. O propagador do CLP(FD) poda automaticamente as diagonais assim que uma variável é fixada em `1`, mantendo a regra puramente declarativa e independente da estratégia de busca (`labeling/2`).
 
 ## 6. Parte em Elm
 
 ### 6.1 Modelo e mensagens
 
-<!--
-  Os tipos centrais do programa: o Model, o tipo Msg e os custom types do
-  domínio. Explique as escolhas: por que um custom type e não um Bool, por
-  que Maybe ou Result, etc.
--->
-
 ```elm
-[type alias Model = ...]
-[type Msg = ...]
+type Cell
+    = Empty
+    | Puppy
+    | Excluded
+
+type Phase
+    = Generating
+    | GenerationFailed Api.Error
+    | Playing
+    | Solved
+
+type alias Model =
+    { puzzle : Maybe Puzzle
+    , original : Maybe Puzzle
+    , difficulty : String
+    , phase : Phase
+    , outcome : Api.Outcome
+    , conflicts : List ( Int, Int )
+    , problem : Maybe Api.Error
+    , request : Maybe Request
+    , version : Int
+    , dark : Bool
+    , seconds : Int
+    , moves : Int
+    , hints : Int
+    , started : Bool
+    , hintAt : Maybe ( Int, Int )
+    , focus : ( Int, Int )
+    , winOpen : Bool
+    , said : String
+    , announce : String
+    }
+
+type Msg
+    = NewGame String
+    | GotGame Int (Result Api.Error Puzzle)
+    | PressCell Int Int
+    | FocusCell Int Int
+    | BoardKey Board.Key
+    | GotCheck Int (Result Api.Error Api.CheckResult)
+    | AskHint
+    | GotHint Int (Result Api.Error Api.Hint)
+    | AskSolve
+    | GotSolution Int (Result Api.Error Puzzle)
+    | Reset
+    | ToggleTheme
+    | CloseVictory
+    | Tick
+    | NoOp
 ```
 
-[Explicação das escolhas.]
+Em vez de representar células com inteiros soltos (`0`, `1`, `-1`) e estados da partida com múltiplos `Bool`, usamos *custom types* como `Grid.Cell`, `Phase`, `Request`, `Api.Error`, `Api.Outcome`, `Board.Mode` e `Regions.Seal`. O campo `version : Int` acompanha cada requisição assíncrona para descartar respostas antigas caso o jogador reinicie ou troque de dificuldade antes de o servidor responder.
 
 ### 6.2 Conceitos do paradigma funcional utilizados
 
-- [ ] Arquitetura Elm (Model, update, view): [onde]
-- [ ] Custom types e `case` exaustivo: [onde]
-- [ ] `Maybe` e `Result` no lugar de null e exceções: [onde]
-- [ ] Funções de ordem superior e aplicação parcial: [onde]
-- [ ] Composição (`|>`, `>>`): [onde]
-- [ ] Decoders e encoders JSON: [onde]
-- [ ] Comandos e subscriptions (efeitos controlados): [onde]
-- [ ] Imutabilidade e atualização de records: [onde]
-- [ ] Outro: [...]
+- [x] Arquitetura Elm (Model, update, view): `frontend/src/Main.elm:44-695`
+- [x] Custom types e `case` exaustivo: `Cell` (`Grid.elm:16-19`), `Phase` (`Main.elm:30-35`), `Seal` (`Regions.elm:39-42`), `Key` (`Board.elm:234-238`)
+- [x] `Maybe` e `Result` no lugar de null e exceções: `Grid.at` retorna `Maybe a` (`Grid.elm:69-77`), `cellFromInt` retorna `Maybe Cell` (`Grid.elm:25-39`) e respostas HTTP usam `Result Api.Error a` (`Api.elm:69-90`)
+- [x] Funções de ordem superior e aplicação parcial: `List.indexedMap`, `List.map2`, `List.filter` em `Grid.elm:80-106` e `Regions.elm:48-63`
+- [x] Composição (`|>`, `>>`): `Grid.at` (`Grid.elm:74-77`) e `encodeBoard` (`Api.elm:231-233`)
+- [x] Decoders e encoders JSON: `cellDecoder`, `puzzleDecoder`, `checkDecoder`, `hintDecoder`, `encodePuzzle` (`Api.elm:156-240`)
+- [x] Comandos e subscriptions (efeitos controlados): `Time.every 1000` em `subscriptions` (`Main.elm:122-128`) e `Browser.Dom.focus` em `focusOn` (`Main.elm:485-487`)
+- [x] Imutabilidade e atualização de records: atualização de `Model` e `Puzzle` via `{ model | ... }` em `Main.elm:170-375`
 
 ### 6.3 Trecho em destaque
 
 ```elm
-[trecho]
+cellDecoder : Decoder Cell
+cellDecoder =
+    Decode.int
+        |> Decode.andThen
+            (\value ->
+                case Grid.cellFromInt value of
+                    Just cell ->
+                        Decode.succeed cell
+
+                    Nothing ->
+                        Decode.fail ("Valor de célula inválido: " ++ String.fromInt value)
+            )
 ```
 
-[Explicação.]
+Ao combinar `Decode.andThen` com `Grid.cellFromInt : Int -> Maybe Cell`, garantimos na fronteira da API que nenhum inteiro fora de `-1`, `0` ou `1` entra no estado da aplicação. A refatoração de `Int` para `Cell` foi guiada diretamente pelo compilador do Elm em todos os módulos dependentes (`Api`, `Regions`, `Hud`, `Board` e `Main`).
 
 ## 7. Integração
 
-<!--
-  Curto: a parte Python não é avaliada. Liste as rotas ou a forma de
-  comunicação e o formato dos dados trocados. Se o grupo não usou Python,
-  explique como Elm e Prolog se comunicam.
--->
-
 | Rota / chamada | Entrada | Saída | Predicado Prolog |
 |----------------|---------|-------|------------------|
-| [`POST /api/...`] | [...] | [...] | [`...`] |
+| `POST /api/generate` | `{"difficulty": "easy" \| "hard"}` | `{"regions": [[...]], "board": [[...]]}` | `queens:gerar/3` |
+| `POST /api/check` | `{"regions": [[...]], "board": [[...]]}` | `{"status": "incompleto" \| "conflito" \| "venceu", "conflicts": [[r, c], ...]}` | `queens:verificar/4` |
+| `POST /api/hint` | `{"regions": [[...]], "board": [[...]]}` | `{"row": r, "col": c, "value": 1}` | `queens:dica/3` |
+| `POST /api/solve` | `{"regions": [[...]], "board": [[...]]}` | `{"regions": [[...]], "board": [[...]]}` | `queens:resolver/3` |
 
 ## 8. Testes e validação
 
-<!--
-  Como o grupo sabe que o sistema funciona? Testes automatizados (plunit,
-  pytest, elm-test), roteiros de teste manual, casos de borda verificados.
--->
-
-- [O que foi testado e como.]
-- [Casos de borda considerados.]
+- **Prolog (`plunit`):** 20 testes (+1 sub-teste) em `backend/prolog/test_queens.pl` cobrindo restrições de linha, coluna, região, contato diagonal imediato vs diagonal distante, exclusões (`-1`), dicas (obrigatória, ambígua, completa e impossível), geração `easy`/`hard` com conectividade e unicidade de solução, e `verificar/4`.
+- **Backend (`pytest`):** 13 testes em `backend/tests/test_api.py` cobrindo o fluxo completo de `generate`, `hint`, `solve` e `check` (incompleto com exclusões, vitória, conflitos de linha/diagonal/região e rejeição `422` de formatos inválidos).
+- **Frontend (`elm-test`):** 34 testes em `frontend/tests/` (`GridTest.elm`, `RegionsTest.elm`, `BoardTest.elm`, `HudTest.elm`, `ApiTest.elm`) validando conversões `Cell`, limites negativos e fora da grade em `Grid.at`, imutabilidade de `setCell`, classificação de selos, navegação por teclado nas bordas e formatação de tempo/erros.
 
 ## 9. Limitações e problemas conhecidos
 
-<!--
-  Seja honesto. Um problema conhecido e bem descrito vale mais que um
-  problema escondido que o avaliador descobre sozinho.
--->
-
-- [Limitação ou bug conhecido, e em que situação acontece.]
-- [O que o grupo faria com mais tempo.]
+- No Safari (WebKit), o foco movido programaticamente por `Browser.Dom.focus` durante a navegação por setas pode não ativar `:focus-visible` caso a interação anterior tenha sido um clique de mouse, ocultando o anel visual da célula atual.
+- Ao subir backend e frontend juntos com `make dev` (`make -j2`) no macOS, o Vite inicia antes do FastAPI concluir a carga do SWI-Prolog, podendo causar erro transitório na primeira requisição `/api/generate`; rodar `make backend` e `make frontend` em terminais separados evita o problema.
 
 ## 10. Contribuição de cada integrante
 
-<!--
-  O que cada pessoa fez. Deve ser coerente com o histórico de commits do
-  repositório. Todos os integrantes precisam concordar com esta tabela.
--->
-
 | Integrante | Principais contribuições |
 |------------|--------------------------|
-| [Nome]     | [...] |
-| [Nome]     | [...] |
-| [Nome]     | [...] |
-| [Nome]     | [...] |
-| [Nome]     | [...] |
-
-<!--
-  Além desta tabela, que é do grupo, cada integrante entrega uma avaliação
-  360 graus individual no SEU repositório do GitHub Classroom, em
-  avaliacao-360/<matricula>.md. Veja o modelo em avaliacao-360/TEMPLATE.md.
--->
+| Diogo Rodrigues Barboza | Padronização com `elm-format`, configuração e implementação dos 34 testes unitários em `elm-test`, cobertura `pytest` para `/api/check`, refatoração de células `Int` para o *custom type* `Cell` em Elm e estruturação inicial do `README.md` e `RELATORIO.md`. |
+| Maurício Ferreira de Araújo | Integração do `frontend` em `elm` com a api, criação dos tipos para comunicação com `FastApi` e mvp funcional do tabuleiro dos puppies. |
+| Júlia Rocha Fortunato | Criação das rotas da api, criação da logica em prolog, integração do `FastApi` com os arquivos prolog, e criação e organização dos slides de apresentação. |
+| Luana Ribeiro Soares | Criação e organização dos slides de apresentação, participação no desenvolvimento do frontend em Elm, pair programming, contribuição na estilização e ajustes da interface nos arquivos CSS e implementação da integração do frontend com a API. |
+| Natália Rodrigues de Morais | Implementação do predicado verificar/4 em Prolog (queens.pl) para avaliar o estado do tabuleiro (incompleto, conflito e venceu) e identificar conflitos de linha, coluna, diagonal adjacente e região, integração via Janus em prolog.py, criação do endpoint POST /api/check com o modelo RespostaVerificacao em main.py e adição de 6 testes unitários em plunit (test_queens.pl). |
+| André Cláudio Maia da Cunha | Apoio na criação da parte lógica do projeto, refatoração do gerador em Prolog (queens.pl) para gerar tabuleiros easy e hard sem pistas iniciais com crescimento irregular de regiões ortogonalmente conectadas via library(assoc), refinamento iterativo de fronteiras para garantir solução única, embaralhamento dos IDs das regiões, ampliação dos testes em plunit (test_queens.pl) e pytest (test_api.py) e atualização do backend/README.md.|
+| Felipe de Oliveira Motta | Refatoração do mvp do front, criação dos css para responsividade mobile. |
 
 ## 11. Fontes, código de terceiros e uso de IA
 
-<!--
-  Declare tudo o que não foi escrito pelo grupo. Declarar não tira pontos;
-  deixar de declarar pode anular o trabalho.
--->
+**Código reaproveitado.** Partimos do template oficial da disciplina (Sudoku em Prolog + Elm). Mantivemos o `Makefile`, a estrutura do servidor FastAPI (`backend/app/`) e a arquitetura base do projeto; toda a lógica em `backend/prolog/queens.pl`, os testes em `test_queens.pl`, os módulos do frontend em `frontend/src/` (exceto o `Sudoku.elm` legado) e os testes em `frontend/tests/` foram desenvolvidos pelo grupo para o jogo Puppies.
 
-**Código reaproveitado.** [Ex.: "Partimos do template do Sudoku. Mantivemos
-a integração Python e a estrutura do frontend; o arquivo `x.pl` e os
-módulos `Y.elm` e `Z.elm` foram escritos pelo grupo."]
-
-**Referências.** [Livros, documentação, tutoriais, repositórios consultados.]
+**Referências.** Documentação do SWI-Prolog (`library(clpfd)`, `library(plunit)`), documentação oficial do Elm 0.19.2 e `elm-explorations/test`, e Phosphor Icons 2.1.1 (licença MIT, em `frontend/src/Icons.elm`).
 
 **Uso de ferramentas de IA.**
 
-- **Faixa de uso no código:** [nenhum | pontual | auxiliar | intensivo]
-  <!--
-    nenhum: não usou. pontual: autocompletar, dúvidas, explicar erros.
-    auxiliar: trechos gerados pela IA e revisados pelo grupo. intensivo: a
-    IA escreveu a maior parte do código. Veja o efeito em AVALIACAO.md,
-    seção 1.5. Não declarar anula o trabalho; declarar não tira pontos.
-  -->
+- **Faixa de uso no código:** auxiliar
 
 | Ferramenta | Para que foi usada | Como o grupo verificou o resultado |
 |------------|--------------------|------------------------------------|
-| [Nome ou "nenhuma"] | [...] | [...] |
+| Assistente de IA integrado na IDE | Apoio na refatoração do tipo `Cell` em Elm, criação de testes unitários (`elm-test` e `pytest`) e revisão da documentação | Revisão manual do diff linha a linha, execução de `elm-format --validate`, `elm make`, `elm-test`, `pytest`, `plunit` e teste manual no navegador |
+| Codex | Apoio na refatoração do css no front, revisão da documentação, criação das regras de negocio em prolog | Revisão manual do diff linha a linha, teste manual no navegador e uso do `swipl` |
 
 ## 12. Apresentação oral
 
-<!--
-  A apresentação tem 15 minutos e acontece no final do semestre. Uma
-  divisão que costuma funcionar: 2 min de contexto, 5 min de demonstração
-  do sistema funcionando, 6 min mostrando o código Prolog e Elm mais
-  interessante, 2 min de limitações e aprendizados. Todos os integrantes
-  devem falar.
-
-  Preencha esta seção antes da apresentação.
--->
-
-- **Slides:** [mesmo caminho indicado na seção 1, ou "não há"]
+- **Slides:** [Slides de Apresentação](https://canva.link/ql20jjgap8w35wc)
 - **Roteiro:**
 
 | Parte | Duração | Quem apresenta |
-|-------|:-------:|----------------|
-| [Contexto e objetivo] | [2 min] | [Nome] |
-| [Demonstração] | [5 min] | [Nome] |
-| [Código Prolog] | [3 min] | [Nome] |
-| [Código Elm] | [3 min] | [Nome] |
-| [Limitações e aprendizados] | [2 min] | [Nome] |
+|-------|---------|----------------|
+| Contexto e regras do Puppies | 1 min | Luana |
+| Tecnologias e arquitetura da implementação | 1 min | Natália |
+| Código Prolog (`backend/prolog/queens.pl`): restrições, resolução, dicas e geração | 3 min | Júlia e André |
+| Código Elm (`Grid.elm`, `Main.elm`, `Api.elm`): tipos, estado e comunicação | 3 min | Maurício, Felipe e Diogo |
+| Demonstração do sistema: jogadas, conflitos, dicas e solução | 4 min | Maurício |
+| Etapas do projeto e organização do grupo | 1 min | Luana |
+| Limitações, dificuldades e aprendizados sobre os paradigmas | 1 min | Diogo |
+| Encerramento | 1 min | Natália |
 
 ## 13. Reflexão sobre os paradigmas
 
-<!--
-  De 1 a 3 parágrafos. Perguntas que podem ajudar:
-  - O que ficou mais simples em Prolog do que seria numa linguagem
-    imperativa? E o que ficou mais difícil?
-  - O que o compilador do Elm impediu que desse errado?
-  - Como a forma de pensar mudou entre as duas linguagens?
--->
+Trabalhar com Prolog mostrou como a programação por restrições com CLP(FD) muda o foco do "como buscar" para "o que precisa ser verdade". Declarar as regras do tabuleiro (um puppy por linha, coluna, região e sem contato diagonal imediato) em `modelo/3` permitiu reutilizar exatamente a mesma especificação tanto para resolver tabuleiros quanto para provar unicidade na geração e calcular dicas obrigatórias em `dica/3`, sem duplicar algoritmos de busca.
 
-[Reflexão.]
-
----
-
-<!--
-  CHECKLIST ANTES DE ENTREGAR (apague esta seção depois de conferir)
-
-  - [ ] `uv run scripts/validar_entrega.py` termina sem erros.
-  - [ ] Todos os integrantes, com matrícula e turma, estão na seção 1.
-  - [ ] O commit ou tag da seção 1 existe no repositório e é a versão final.
-  - [ ] As instruções da seção 3 funcionam numa máquina sem nada instalado
-        além dos requisitos listados.
-  - [ ] Os locais indicados (arquivo:linha) conferem com o commit entregue.
-  - [ ] As seções 10 e 11 foram revisadas por todo o grupo.
-  - [ ] Se há slides, o arquivo está no repositório e o caminho da seção 1
-        está certo.
-  - [ ] Cada integrante entregou a própria avaliação 360 graus no seu
-        repositório individual, em avaliacao-360/<matricula>.md.
-  - [ ] Nenhum texto entre [colchetes] ou comentário de instrução sobrou.
--->
+No lado do Elm, a tipagem estática forte e a ausência de `null` e exceções tornaram as refatorações muito mais seguras. Quando substituímos os inteiros soltos (`0`, `1`, `-1`) pelo *custom type* `Cell` e alteramos `Grid.at` para retornar `Maybe a`, o próprio compilador apontou cada função e padrão de `case` que precisava ser atualizado nos demais módulos, eliminando erros silenciosos em tempo de execução.

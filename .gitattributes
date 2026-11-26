@@ -1,0 +1,6 @@
+# Mant?m arquivos de texto em LF, inclusive no Windows.
+* text=auto eol=lf
+
+# Scripts nativos do Windows usam CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf

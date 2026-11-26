@@ -1,187 +1,244 @@
 module Api exposing
-    ( Difficulty(..)
+    ( CheckResult
+    , Error(..)
     , Hint
-    , difficultyLabel
+    , Outcome(..)
+    , Puzzle
+    , check
+    , errorText
     , generate
     , hint
     , solve
     )
 
-{-| Comunicação com o backend (FastAPI + Prolog).
+{-| Comunicação com o backend FastAPI + Prolog.
 
-Em Elm, uma requisição HTTP não "acontece" quando chamamos uma função. As
-funções deste módulo devolvem um `Cmd msg`: uma DESCRIÇÃO do efeito que
-queremos. Quem executa o efeito é o runtime do Elm; quando a resposta chega,
-ele chama nosso `update` com a mensagem que indicamos (por exemplo,
-`GotPuzzle resultado`). É assim que o Elm mantém todas as funções puras.
-
-As URLs começam com `/api/...`. Em desenvolvimento, o Vite repassa essas
-requisições para o backend em <http://localhost:8000> (veja vite.config.js).
+Todas as regras do jogo ficam no Prolog; aqui só montamos os pedidos JSON e
+lemos as respostas.
 
 -}
 
+import Grid exposing (Cell)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Sudoku exposing (Board)
 
 
-type Difficulty
-    = Easy
-    | Medium
-    | Hard
+
+-- TIPOS
 
 
-difficultyLabel : Difficulty -> String
-difficultyLabel difficulty =
-    case difficulty of
-        Easy ->
-            "Fácil"
-
-        Medium ->
-            "Médio"
-
-        Hard ->
-            "Difícil"
+type alias RegionsGrid =
+    List (List Int)
 
 
-{-| Nome usado pela API (e pelo Prolog: são os átomos easy/medium/hard).
--}
-difficultyToString : Difficulty -> String
-difficultyToString difficulty =
-    case difficulty of
-        Easy ->
-            "easy"
-
-        Medium ->
-            "medium"
-
-        Hard ->
-            "hard"
+type alias Board =
+    List (List Cell)
 
 
-{-| Um _record_ (registro): um conjunto de campos com nome. O `type alias`
-também cria automaticamente uma função construtora `Hint : Int -> Int -> Int
--> Hint`, que usamos no decoder abaixo.
--}
+type alias Puzzle =
+    { regions : RegionsGrid, board : Board }
+
+
+type Outcome
+    = Incomplete
+    | Conflict
+    | Won
+
+
+type alias CheckResult =
+    { outcome : Outcome, conflicts : List ( Int, Int ) }
+
+
 type alias Hint =
-    { row : Int
-    , col : Int
-    , value : Int
-    }
+    { row : Int, col : Int, value : Cell }
+
+
+{-| Erros que a interface sabe explicar.
+
+  - `Offline`: a API não respondeu (servidor desligado, porta errada).
+  - `Rejected`: a API recusou o pedido e explicou o motivo em `detail`.
+  - `Failed`: qualquer outra falha.
+
+-}
+type Error
+    = Offline
+    | Rejected String
+    | Failed
 
 
 
--- REQUISIÇÕES
---
--- Todas recebem uma função `toMsg` que diz como embrulhar o resultado numa
--- mensagem. `Result String a` é: ou `Ok valor`, ou `Err mensagemDeErro`.
+-- PEDIDOS
 
 
-generate : Difficulty -> (Result String Board -> msg) -> Cmd msg
+generate : String -> (Result Error Puzzle -> msg) -> Cmd msg
 generate difficulty toMsg =
+    post "/api/generate"
+        (Encode.object [ ( "difficulty", Encode.string difficulty ) ])
+        puzzleDecoder
+        toMsg
+
+
+check : Puzzle -> (Result Error CheckResult -> msg) -> Cmd msg
+check puzzle toMsg =
+    post "/api/check" (encodePuzzle puzzle) checkDecoder toMsg
+
+
+hint : Puzzle -> (Result Error Hint -> msg) -> Cmd msg
+hint puzzle toMsg =
+    post "/api/hint" (encodePuzzle puzzle) hintDecoder toMsg
+
+
+solve : Puzzle -> (Result Error Puzzle -> msg) -> Cmd msg
+solve puzzle toMsg =
+    post "/api/solve" (encodePuzzle puzzle) puzzleDecoder toMsg
+
+
+post : String -> Encode.Value -> Decoder a -> (Result Error a -> msg) -> Cmd msg
+post url body decoder toMsg =
     Http.post
-        { url = "/api/generate"
-        , body =
-            Http.jsonBody
-                (Encode.object [ ( "difficulty", Encode.string (difficultyToString difficulty) ) ])
-        , expect = expectJson toMsg boardDecoder
+        { url = url
+        , body = Http.jsonBody body
+        , expect = expectJson toMsg decoder
         }
 
 
-solve : Board -> (Result String Board -> msg) -> Cmd msg
-solve board toMsg =
-    Http.post
-        { url = "/api/solve"
-        , body = Http.jsonBody (encodeBoard board)
-        , expect = expectJson toMsg boardDecoder
-        }
-
-
-hint : Board -> (Result String Hint -> msg) -> Cmd msg
-hint board toMsg =
-    Http.post
-        { url = "/api/hint"
-        , body = Http.jsonBody (encodeBoard board)
-        , expect = expectJson toMsg hintDecoder
-        }
-
-
-
--- JSON
---
--- Elm não converte JSON em valores "magicamente". Escrevemos DECODERS, que
--- descrevem a forma esperada do JSON. Se o JSON vier diferente, a decodificação
--- falha com uma mensagem de erro, em vez de gerar um valor inválido.
-
-
-{-| Envia `{"board": [[5,3,0,...], ...]}`.
+{-| Como `Http.expectJson`, mas lê o campo `detail` das respostas de erro do
+FastAPI para mostrar a explicação do backend.
 -}
-encodeBoard : Board -> Encode.Value
-encodeBoard board =
-    Encode.object
-        [ ( "board", Encode.list (Encode.list Encode.int) (Sudoku.toLists board) ) ]
-
-
-{-| Lê `{"board": [[...], ...]}`. Decoders se combinam como peças de Lego:
-`Decode.list (Decode.list Decode.int)` é "uma lista de listas de inteiros".
--}
-boardDecoder : Decoder Board
-boardDecoder =
-    Decode.field "board" (Decode.list (Decode.list Decode.int))
-        |> Decode.map Sudoku.fromLists
-
-
-{-| `Decode.map3` junta três decoders e passa os três resultados para a
-função `Hint` (o construtor do record).
--}
-hintDecoder : Decoder Hint
-hintDecoder =
-    Decode.map3 Hint
-        (Decode.field "row" Decode.int)
-        (Decode.field "col" Decode.int)
-        (Decode.field "value" Decode.int)
-
-
-
--- TRATAMENTO DE ERROS
---
--- `Http.expectJson` já existe, mas quando o servidor responde com erro (ex.:
--- 422) ele descarta o corpo da resposta. Nosso backend manda uma mensagem útil
--- em `{"detail": "..."}`, então escrevemos nossa própria versão, que olha o
--- corpo e devolve sempre um `Result String a` com mensagens em português.
-
-
-expectJson : (Result String a -> msg) -> Decoder a -> Http.Expect msg
+expectJson : (Result Error a -> msg) -> Decoder a -> Http.Expect msg
 expectJson toMsg decoder =
     Http.expectStringResponse toMsg <|
         \response ->
             case response of
                 Http.GoodStatus_ _ body ->
                     Decode.decodeString decoder body
-                        |> Result.mapError (\_ -> "Resposta inesperada do servidor.")
+                        |> Result.mapError (\_ -> Failed)
 
                 Http.BadStatus_ metadata body ->
-                    Err (errorDetail metadata.statusCode body)
+                    case Decode.decodeString (Decode.field "detail" Decode.string) body of
+                        Ok detail ->
+                            Err (Rejected detail)
 
-                Http.BadUrl_ url ->
-                    Err ("URL inválida: " ++ url)
+                        Err _ ->
+                            -- O proxy do Vite responde 502/503/504 quando o
+                            -- backend está desligado.
+                            if List.member metadata.statusCode [ 502, 503, 504 ] then
+                                Err Offline
 
-                Http.Timeout_ ->
-                    Err "O servidor demorou demais para responder."
+                            else
+                                Err Failed
 
                 Http.NetworkError_ ->
-                    Err "Não foi possível falar com o servidor. O backend está rodando?"
+                    Err Offline
+
+                Http.Timeout_ ->
+                    Err Offline
+
+                Http.BadUrl_ _ ->
+                    Err Failed
 
 
-{-| Tenta extrair o campo `detail` (quando ele é uma string). Se não der,
-monta uma mensagem genérica com o código HTTP.
--}
-errorDetail : Int -> String -> String
-errorDetail status body =
-    case Decode.decodeString (Decode.field "detail" Decode.string) body of
-        Ok detail ->
+errorText : Error -> String
+errorText error =
+    case error of
+        Offline ->
+            "Sem conexão com a API na porta 8000."
+
+        Rejected detail ->
             detail
 
-        Err _ ->
-            "Erro no servidor (código " ++ String.fromInt status ++ ")."
+        Failed ->
+            "Não foi possível completar a operação. Tente de novo."
+
+
+
+-- JSON
+
+
+regionsDecoder : Decoder RegionsGrid
+regionsDecoder =
+    Decode.list (Decode.list Decode.int)
+
+
+cellDecoder : Decoder Cell
+cellDecoder =
+    Decode.int
+        |> Decode.andThen
+            (\value ->
+                case Grid.cellFromInt value of
+                    Just cell ->
+                        Decode.succeed cell
+
+                    Nothing ->
+                        Decode.fail ("Valor de célula inválido: " ++ String.fromInt value)
+            )
+
+
+boardDecoder : Decoder Board
+boardDecoder =
+    Decode.list (Decode.list cellDecoder)
+
+
+puzzleDecoder : Decoder Puzzle
+puzzleDecoder =
+    Decode.map2 Puzzle
+        (Decode.field "regions" regionsDecoder)
+        (Decode.field "board" boardDecoder)
+
+
+outcomeDecoder : Decoder Outcome
+outcomeDecoder =
+    Decode.string
+        |> Decode.map
+            (\status ->
+                case status of
+                    "venceu" ->
+                        Won
+
+                    "conflito" ->
+                        Conflict
+
+                    _ ->
+                        Incomplete
+            )
+
+
+checkDecoder : Decoder CheckResult
+checkDecoder =
+    Decode.map2 CheckResult
+        (Decode.field "status" outcomeDecoder)
+        (Decode.field "conflicts"
+            (Decode.list
+                (Decode.map2 Tuple.pair
+                    (Decode.index 0 Decode.int)
+                    (Decode.index 1 Decode.int)
+                )
+            )
+        )
+
+
+hintDecoder : Decoder Hint
+hintDecoder =
+    Decode.map3 Hint
+        (Decode.field "row" Decode.int)
+        (Decode.field "col" Decode.int)
+        (Decode.field "value" cellDecoder)
+
+
+encodeRegions : RegionsGrid -> Encode.Value
+encodeRegions regions =
+    Encode.list (Encode.list Encode.int) regions
+
+
+encodeBoard : Board -> Encode.Value
+encodeBoard board =
+    Encode.list (Encode.list (Grid.cellToInt >> Encode.int)) board
+
+
+encodePuzzle : Puzzle -> Encode.Value
+encodePuzzle puzzle =
+    Encode.object
+        [ ( "regions", encodeRegions puzzle.regions )
+        , ( "board", encodeBoard puzzle.board )
+        ]
