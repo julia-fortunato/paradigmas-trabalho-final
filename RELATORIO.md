@@ -15,7 +15,7 @@
 - **Nome do projeto:** Puppies
 - **Nome do grupo:** MeLasqueixon
 - **Repositório:** https://github.com/julia-fortunato/paradigmas-trabalho-final
-- **Commit ou tag entregue:** [a definir na tag final]
+- **Commit ou tag entregue:** [Tag da Entrega Final](https://github.com/julia-fortunato/paradigmas-trabalho-final/releases/tag/EntregaFinal)
 - **Ponto de partida:** remix original
 - **Slides da apresentação oral:** [Slides de Apresentação](https://canva.link/ql20jjgap8w35wc)
 
