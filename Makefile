@@ -22,5 +22,3 @@ test-prolog:
 test-backend:
 	cd backend && uv run pytest
 
-validar:            ## confere a forma do RELATORIO.md e das avaliações 360
-	uv run scripts/validar_entrega.py

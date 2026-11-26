@@ -68,9 +68,3 @@ cd frontend && npx elm-format --validate src tests
 | `POST /api/check` | `{"regions": [[...]], "board": [[...]]}` | `{"status": "incompleto" \| "conflito" \| "venceu", "conflicts": [[r, c], ...]}` |
 | `POST /api/hint` | `{"regions": [[...]], "board": [[...]]}` | `{"row": r, "col": c, "value": 1}` (ou `422` se completo/impossível/ambíguo) |
 | `POST /api/solve` | `{"regions": [[...]], "board": [[...]]}` | `{"regions": [[...]], "board": [[...]]}` (ou `422` se sem solução) |
-
-## Validação da entrega
-
-```sh
-make validar
-```
